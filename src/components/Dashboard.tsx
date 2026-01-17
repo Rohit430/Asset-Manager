@@ -66,7 +66,7 @@ export function Dashboard() {
         {syncing && <span className="text-xs text-indigo-500 font-medium animate-pulse">Syncing...</span>}
       </div>
 
-      {/* Summary Cards with Original HTML Gradients */}
+      {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         
         {/* Total Investment */}

@@ -2,21 +2,62 @@ import { useEffect, useState } from 'react';
 import { HashRouter, Routes, Route, Navigate, useLocation, Link } from 'react-router-dom';
 import { supabase } from '@/lib/supabase';
 import { Auth } from '@/components/Auth';
-import { LayoutDashboard, Wallet, ArrowRightLeft, Settings, PlusCircle } from 'lucide-react';
-import { Toaster } from 'sonner';
-import { ConflictResolver } from '@/components/ConflictResolver';
-
-// Placeholder Components (We will build these next)
-import { Dashboard } from '@/components/Dashboard';
-import { AddPage } from '@/pages/AddPage';
-import { AssetsPage } from '@/pages/AssetsPage';
-import { AssetDetailsPage } from '@/pages/AssetDetailsPage';
-import { LiquidAssetsPage } from '@/pages/LiquidAssetsPage';
-import { TransactionsPage } from '@/pages/TransactionsPage';
-import { SettingsPage } from '@/pages/SettingsPage';
+import { LayoutDashboard, Wallet, ArrowRightLeft, Settings, PlusCircle, Download, Upload } from 'lucide-react';
+import { useData } from '@/hooks/useData';
+import { decryptData, encryptData } from '@/lib/crypto';
 
 function AppLayout({ children }: { children: React.ReactNode }) {
   const location = useLocation();
+  const { assets, transactions, liquidAssets, preferences, refresh } = useData();
+
+  const handleExport = async () => {
+    const data = {
+      assets,
+      transactions,
+      liquidAssets,
+      preferences,
+      version: 2,
+      exportedAt: new Date().toISOString()
+    };
+    
+    // Create downloadable blob
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `asset-fortress-backup-${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  const handleImport = () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'application/json';
+    input.onchange = async (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        try {
+          const content = e.target?.result as string;
+          const data = JSON.parse(content);
+          
+          // Logic to process import would go here - for now we just log it
+          // In a real implementation, we would loop through and insert these
+          console.log('Importing:', data);
+          alert('Import feature coming in next update! (Data parsed successfully)');
+        } catch (err) {
+          alert('Invalid backup file');
+        }
+      };
+      reader.readAsText(file);
+    };
+    input.click();
+  };
 
   const navItems = [
     { icon: LayoutDashboard, label: 'Dashboard', path: '/' },
