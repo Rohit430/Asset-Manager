@@ -1,6 +1,5 @@
 import { useMemo } from 'react';
 import { useData } from '@/hooks/useData';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { getFinancialYear } from '@/lib/fifo';
 
 export function YearlySummary() {
