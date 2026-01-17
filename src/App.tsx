@@ -1,14 +1,22 @@
 import { useEffect, useState } from 'react';
-import { HashRouter, Routes, Route, Navigate, useLocation, Link } from 'react-router-dom';
+import { HashRouter, Routes, Route, Navigate, Link, useLocation } from 'react-router-dom';
 import { supabase } from '@/lib/supabase';
 import { Auth } from '@/components/Auth';
-import { LayoutDashboard, Wallet, ArrowRightLeft, Settings, PlusCircle, Download, Upload } from 'lucide-react';
+import { LayoutDashboard, Wallet, ArrowRightLeft, Settings, PlusCircle, Download, Upload, LogOut } from 'lucide-react';
 import { useData } from '@/hooks/useData';
-import { decryptData, encryptData } from '@/lib/crypto';
+import { Dashboard } from '@/components/Dashboard';
+import { AssetsPage } from '@/pages/AssetsPage';
+import { LiquidAssetsPage } from '@/pages/LiquidAssetsPage';
+import { AssetDetailsPage } from '@/pages/AssetDetailsPage';
+import { TransactionsPage } from '@/pages/TransactionsPage';
+import { SettingsPage } from '@/pages/SettingsPage';
+import { AddPage } from '@/pages/AddPage';
+import { ConflictResolver } from '@/components/ConflictResolver';
+import { Toaster } from 'sonner';
 
 function AppLayout({ children }: { children: React.ReactNode }) {
   const location = useLocation();
-  const { assets, transactions, liquidAssets, preferences, refresh } = useData();
+  const { assets, transactions, liquidAssets, preferences } = useData();
 
   const handleExport = async () => {
     const data = {
@@ -20,7 +28,6 @@ function AppLayout({ children }: { children: React.ReactNode }) {
       exportedAt: new Date().toISOString()
     };
     
-    // Create downloadable blob
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -45,9 +52,6 @@ function AppLayout({ children }: { children: React.ReactNode }) {
         try {
           const content = e.target?.result as string;
           const data = JSON.parse(content);
-          
-          // Logic to process import would go here - for now we just log it
-          // In a real implementation, we would loop through and insert these
           console.log('Importing:', data);
           alert('Import feature coming in next update! (Data parsed successfully)');
         } catch (err) {
@@ -75,7 +79,6 @@ function AppLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      {/* Header matching original prototype */}
       <header className="gradient-header text-white shadow-md sticky top-0 z-50">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
@@ -86,7 +89,6 @@ function AppLayout({ children }: { children: React.ReactNode }) {
               <h1 className="text-xl font-semibold">Asset Manager</h1>
             </div>
             
-            {/* Desktop Navigation - Exact Match to HTML */ }
             <div className="hidden md:flex items-center space-x-4">
               <Link to="/add">
                 <button className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-medium py-2 px-4 rounded-lg shadow-md hover:shadow-lg transition-all flex items-center space-x-2">
@@ -107,34 +109,30 @@ function AppLayout({ children }: { children: React.ReactNode }) {
                 </svg>
               </Link>
 
-              <button title="Export Data" className="text-indigo-100 hover:text-white transition-colors">
-                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" />
-                </svg>
+              <button onClick={handleExport} title="Export Data" className="text-indigo-100 hover:text-white transition-colors">
+                 <Download className="w-6 h-6" />
+              </button>
+
+              <button onClick={handleImport} title="Import Data" className="text-indigo-100 hover:text-white transition-colors">
+                 <Upload className="w-6 h-6" />
               </button>
 
               <Link to="/settings" title="Settings" className="text-indigo-100 hover:text-white transition-colors">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M10.343 3.94c.09-.542.56-1.002 1.13-1.226 1.13-1.226 2.403.09 2.403 1.226v.292c.318.078.636.17 1.002.27 1.13.303 1.386 1.83.606 2.61l-.25.25c-.44.44-.7.99-.7 1.61v.293c0 .69.56 1.25 1.25 1.25h.293c1.136 0 2.305 1.17 1.226 2.403-.224.57-.684 1.04-1.226 1.13v.292c0 1.136-1.273 2.403-2.403 1.226-.542-.09-1.002-.56-1.226-1.13a11.962 11.962 0 0 1-2.7 1.002c-1.13.303-1.83.606-2.61.606l-.25-.25c-.44-.44-.99-.7-1.61-.7h-.293c-.69 0-1.25.56-1.25 1.25v.293c0 1.136-1.17 2.305-2.403 1.226-.57-.224-1.04-.684-1.13-1.226v-.292c-.078-.318-.17-.636-.27-1.002-.303-1.13-.606-1.83.606-2.61l.25-.25c.44.44.7-.99.7-1.61v-.293c0-.69-.56-1.25-1.25-1.25h-.293c-1.136 0-2.305-1.17-1.226-2.403.224.57.684 1.04 1.226-1.13v-.292c0-1.136 1.273 2.403 2.403 1.226.542.09 1.002.56 1.226 1.13.938-.198 1.82-.51 2.7-1.002Z M12 15.75a3.75 3.75 0 1 0 0-7.5 3.75 3.75 0 0 0 0 7.5Z" />
-                </svg>
+                <Settings className="w-6 h-6" />
               </Link>
 
               <button onClick={handleLogout} title="Logout" className="text-indigo-100 hover:text-white transition-colors">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m-3-1.5-3-3m0 0 3-3m-3 3H21" />
-                </svg>
+                <LogOut className="w-6 h-6" />
               </button>
             </div>
           </div>
         </div>
       </header>
 
-      {/* Main Content */}
       <main className="container mx-auto p-4 sm:p-6 lg:p-8 pb-24">
         {children}
       </main>
 
-      {/* Mobile Bottom Nav */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-around p-2 z-50 shadow-lg safe-area-pb">
         {navItems.map((item) => {
           const isActive = location.pathname === item.path;
@@ -189,12 +187,8 @@ function App() {
     );
   }
 
-  // Check if Master Key is unlocked
   const isUnlocked = sessionStorage.getItem('master_key');
   if (!isUnlocked) {
-    // If logged in but MK missing (refresh), we need to re-enter password.
-    // We can reuse the Auth component but force it to Login state, 
-    // or typically we just sign them out to force a clean login flow for security.
     supabase.auth.signOut();
     return null; 
   }

@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useData } from '@/hooks/useData';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -40,6 +40,23 @@ export function AddTransactionForm({
     fees: existingTx ? existingTx.data.miscCosts.toString() : '0',
     notes: existingTx ? (existingTx.data.notes || '') : ''
   });
+
+  // Sync state when existingTx loads (fixes "Select Asset" bug on refresh)
+  useEffect(() => {
+    if (existingTx) {
+      setFormData({
+        assetId: existingTx.asset_id,
+        type: existingTx.type,
+        date: existingTx.tx_date,
+        quantity: existingTx.data.quantity.toString(),
+        price: (existingTx.data.originalPrice || existingTx.data.price).toString(),
+        currency: existingTx.data.currency || 'INR',
+        exchangeRate: (existingTx.data.exchangeRate || 1).toString(),
+        fees: existingTx.data.miscCosts.toString(),
+        notes: existingTx.data.notes || ''
+      });
+    }
+  }, [existingTx]);
 
   // Calculate Base Price (INR)
   const basePrice = useMemo(() => {
