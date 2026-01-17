@@ -45,6 +45,8 @@ export function Auth() {
       const masterKey = await unwrapMasterKey(profile.wrapped_key, password)
       sessionStorage.setItem('master_key', masterKey)
       toast.success('Secure session initialized')
+      // Force reload to clear any stale state and trigger App re-render
+      window.location.reload()
     } catch (err: any) {
       console.error(err)
       toast.error('Decryption failed. Check your password.')

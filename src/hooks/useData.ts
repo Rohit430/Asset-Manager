@@ -106,7 +106,7 @@ export function useData() {
 
     } catch (err: any) {
       console.error('Sync Error:', err);
-      toast.error('Failed to sync data');
+      // toast.error('Failed to sync data'); // Optional: silence this on init
       setState(prev => ({ ...prev, loading: false, syncing: false, conflict: null }));
     }
   }, []);
