@@ -34,63 +34,68 @@ function AppLayout({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <div className="flex min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-50">
-      {/* Desktop Sidebar */}
-      <aside className="hidden md:flex flex-col w-64 border-r bg-white dark:bg-slate-900 p-4 shadow-sm fixed h-full z-20">
-        <div className="flex items-center gap-2 mb-8 px-2">
-          <div className="bg-blue-600 p-2 rounded-lg">
-            <Wallet className="w-6 h-6 text-white" />
-          </div>
-          <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-            Asset Fortress
-          </h1>
-        </div>
-        
-        <nav className="flex-1 space-y-2">
-          {navItems.filter(i => i.label !== 'Add').map((item) => {
-            const isActive = location.pathname === item.path;
-            return (
-              <Link key={item.path} to={item.path}>
-                <Button 
-                  variant={isActive ? "secondary" : "ghost"} 
-                  className={`w-full justify-start gap-3 ${isActive ? 'bg-blue-50 text-blue-700 dark:bg-slate-800 dark:text-blue-400' : ''}`}
-                >
-                  <item.icon className="w-5 h-5" />
-                  {item.label}
-                </Button>
-              </Link>
-            )
-          })}
-        </nav>
+    <div className="min-h-screen bg-slate-50">
+      {/* Gradient Header */}
+      <header className="gradient-header sticky top-0 z-50">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <div className="flex items-center space-x-3">
+              <span className="bg-white/20 p-2 rounded-lg backdrop-blur-sm">
+                <Wallet className="h-6 w-6 text-white" />
+              </span>
+              <h1 className="text-xl font-semibold tracking-wide">Asset Manager</h1>
+            </div>
+            
+            {/* Desktop Nav */}
+            <div className="hidden md:flex items-center space-x-1">
+              {navItems.filter(i => i.label !== 'Add').map((item) => {
+                const isActive = location.pathname === item.path;
+                return (
+                  <Link key={item.path} to={item.path}>
+                    <Button 
+                      variant="ghost" 
+                      className={`text-indigo-100 hover:text-white hover:bg-white/10 ${isActive ? 'bg-white/20 text-white shadow-sm' : ''}`}
+                    >
+                      <item.icon className="w-4 h-4 mr-2" />
+                      {item.label}
+                    </Button>
+                  </Link>
+                )
+              })}
+              <div className="h-6 w-px bg-white/20 mx-2" />
+              <Button variant="ghost" size="icon" className="text-indigo-100 hover:text-white hover:bg-white/10" onClick={handleLogout}>
+                <LogOut className="w-5 h-5" />
+              </Button>
+            </div>
 
-        <div className="pt-4 border-t">
-          <Button variant="ghost" className="w-full justify-start gap-3 text-red-600 hover:text-red-700 hover:bg-red-50" onClick={handleLogout}>
-            <LogOut className="w-5 h-5" />
-            Sign Out
-          </Button>
+            {/* Mobile Menu Button (Placeholder) */}
+            <div className="md:hidden">
+               {/* We keep the bottom nav for mobile as it is better UX, but style it to match */}
+            </div>
+          </div>
         </div>
-      </aside>
+      </header>
 
       {/* Main Content Area */}
-      <main className="flex-1 md:ml-64 pb-20 md:pb-4">
+      <main className="container mx-auto p-4 sm:p-6 lg:p-8 pb-24">
         {children}
       </main>
 
-      {/* Mobile Bottom Nav */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-slate-900 border-t flex justify-around p-2 z-50 safe-area-pb">
+      {/* Mobile Bottom Nav - Styled to match theme */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-lg border-t border-indigo-100 flex justify-around p-2 z-50 safe-area-pb shadow-lg">
         {navItems.map((item) => {
           const isActive = location.pathname === item.path;
           if (item.highlight) {
             return (
               <Link key={item.path} to={item.path} className="-mt-8">
-                <div className="bg-blue-600 text-white p-4 rounded-full shadow-lg hover:scale-105 transition-transform">
+                <div className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white p-4 rounded-full shadow-xl hover:scale-105 transition-transform border-4 border-slate-50">
                   <item.icon className="w-6 h-6" />
                 </div>
               </Link>
             )
           }
           return (
-            <Link key={item.path} to={item.path} className={`flex flex-col items-center p-2 min-w-[64px] ${isActive ? 'text-blue-600' : 'text-slate-500'}`}>
+            <Link key={item.path} to={item.path} className={`flex flex-col items-center p-2 min-w-[64px] ${isActive ? 'text-indigo-700' : 'text-slate-400'}`}>
               <item.icon className="w-6 h-6" />
               <span className="text-[10px] font-medium mt-1">{item.label}</span>
             </Link>

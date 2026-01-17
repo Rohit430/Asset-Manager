@@ -119,11 +119,24 @@
   --sidebar-ring: oklch(0.556 0 0);
 }
 
+.glass-card {
+  @apply bg-white/70 backdrop-blur-xl border border-white/20 shadow-xl;
+}
+
+.dark .glass-card {
+  @apply bg-slate-900/70 backdrop-blur-xl border border-slate-700/50 shadow-xl;
+}
+
+.gradient-header {
+  @apply bg-gradient-to-r from-blue-700 to-indigo-800 text-white shadow-md;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-slate-50 text-slate-900;
+    font-family: 'Inter', sans-serif;
   }
 }
