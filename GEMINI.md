@@ -1,64 +1,56 @@
-# Asset Manager v2 - Project Overview
+# Asset Manager v2 - Asset Fortress
 
-**Asset Manager v2** is a professional-grade, personal finance application designed for security, privacy, and ease of use. It features a "Fortress" architecture with client-side End-to-End Encryption (E2E), ensuring that financial data is never exposed in plain text to the backend provider.
+**Asset Manager v2** is a high-security, personal finance platform designed for ultimate privacy and visual clarity. It implements a "Fortress" architecture where all financial data is encrypted on the client side using AES-GCM before ever touching the backend.
+
+## Key Features
+
+*   **Fortress Security:** End-to-End Encryption (E2EE). Your data is decrypted only in your browser session using a Master Key derived from your password.
+*   **Human-Centric UI:** Exact visual and functional parity with the original single-file prototype, including blue/indigo gradients and glassmorphism.
+*   **FIFO Capital Gains Engine:** Precise First-In-First-Out calculation for realized profit/loss, automatically handling tax terms (STCG/LTCG) for India and US.
+*   **Liquid Assets Separation:** Cash and Fixed Deposits are managed distinctly from investments, with bank-wise breakdowns on the dashboard.
+*   **Interactive Dashboard:** Categorized asset cards, real-time portfolio distribution charts, and a comprehensive year-wise financial summary.
+*   **Data Portability:** Robust JSON Import/Export system for backups and historical migration.
 
 ## Technology Stack
 
-*   **Frontend:** React 19 + TypeScript (via Vite).
-*   **Styling:** Tailwind CSS v4 + Shadcn/UI (Radix Primitives).
-*   **Backend:** Supabase (PostgreSQL + Auth).
-*   **Security:** Web Crypto API (AES-GCM) for client-side encryption.
-*   **State Management:** React Hooks (Migration to TanStack Query planned).
+*   **Frontend:** React 19 + TypeScript (Vite).
+*   **Styling:** Tailwind CSS v4 + Shadcn/UI.
+*   **Backend:** Supabase (Dumb store for encrypted blobs).
+*   **Security:** Web Crypto API (AES-GCM + PBKDF2).
+*   **Charts:** Recharts (Optimized for responsive glassmorphism).
 
 ## Directory Structure
 
-*   `src/lib/`: Core utilities.
-    *   `crypto.ts`: **Critical.** Handles PBKDF2 key derivation and AES-GCM encryption/decryption.
-    *   `supabase.ts`: Supabase client initialization.
-    *   `utils.ts`: Shadcn UI helper functions (cn).
-*   `src/components/`: React components.
-    *   `ui/`: Reusable Shadcn UI primitives (Button, Input, Card, etc.).
-    *   `Auth.tsx`: Authentication logic (Login/Signup).
-*   `src/App.tsx`: Main application entry point handling Auth state and Dashboard rendering.
-*   `backup/`: Contains the original `Asset Manager.html` prototype.
+*   `src/lib/`:
+    *   `crypto.ts`: **The Core.** Handles Master Key derivation and E2E encryption.
+    *   `fifo.ts`: **The Brain.** Implements the FIFO logic and tax calculations.
+*   `src/hooks/`:
+    *   `useData.ts`: **The Sync.** Handles real-time encryption/decryption sync with Supabase.
+*   `src/components/`:
+    *   `Dashboard.tsx`: High-level portfolio overview with categorized cards.
+    *   `YearlySummary.tsx`: Automated tax-year reporting.
+*   `src/pages/`:
+    *   `AssetsPage.tsx`: Detailed inventory with category-specific filtering.
+    *   `LiquidAssetsPage.tsx`: Specialized views for Cash and FD management.
 
 ## Building and Running
 
-1.  **Install Dependencies:**
-    ```bash
-    npm install
-    ```
-
-2.  **Start Development Server:**
-    ```bash
-    npm run dev
-    ```
-
-3.  **Build for Production:**
-    ```bash
-    npm run build
-    ```
+1.  **Install Dependencies:** `npm install`
+2.  **Start Development:** `npm run dev`
+3.  **Deploy:** Pushed to GitHub `master` triggers automated build and deploy to GitHub Pages.
 
 ## Environment Configuration
 
-The application requires a `.env.local` file in the root directory with the following keys:
-
+Requires `.env.local` with:
 ```env
-VITE_SUPABASE_URL=your_supabase_project_url
-VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+VITE_SUPABASE_URL=your_project_url
+VITE_SUPABASE_ANON_KEY=your_anon_key
 ```
-
-## Development Conventions
-
-*   **Security First:** Never send plain-text financial data to the database. Always use `encryptData()` from `@/lib/crypto` before `supabase.from(...).insert()`.
-*   **UI Components:** Use Shadcn/UI components from `@/components/ui`. If a new component is needed, add it via `npx shadcn@latest add <component-name>`.
-*   **Typing:** Maintain strict TypeScript types. Avoid `any`.
-*   **Path Aliases:** Use `@/` to import from `src/` (e.g., `import { Button } from '@/components/ui/button'`).
 
 ## Roadmap Status
 
 *   **Phase 1: Foundation (Complete)** - Project setup, Auth, Fortress Crypto Engine.
 *   **Phase 2: Core Logic (Complete)** - FIFO/Tax engine, Supabase Schema, Local Decryption Sync.
-*   **Phase 3: UI/UX (Complete)** - Responsive Dashboard, Asset/Liquid pages, Mobile Bottom Nav.
-*   **Phase 4: Automation (Complete)** - Historical Currency rates, Stock Ticker support, Conflict resolution.
-*   **Phase 5: Release (Current)** - Final polish, GitHub Actions, JSON Migration.
+*   **Phase 3: UI/UX (Complete)** - Responsive Dashboard, Asset/Liquid pages, Visual Parity.
+*   **Phase 4: Functional Polish (Complete)** - Transaction Editing, Category Filtering, Export/Import.
+*   **Phase 5: Deployment & Migration (Current)** - GitHub Pages live, JSON Migration Scripting.
