@@ -1,92 +1,164 @@
-import { useEffect, useState } from 'react'
-import { supabase } from '@/lib/supabase'
-import { Auth } from '@/components/Auth'
-import { Toaster } from '@/components/ui/sonner'
-import { Button } from '@/components/ui/button'
-import { User } from '@supabase/supabase-js'
+import { useEffect, useState } from 'react';
+import { BrowserRouter, Routes, Route, Navigate, useLocation, Link } from 'react-router-dom';
+import { supabase } from '@/lib/supabase';
+import { Auth } from '@/components/Auth';
+import { LayoutDashboard, Wallet, ArrowRightLeft, Settings, PlusCircle, LogOut } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Toaster } from 'sonner';
+import { ConflictResolver } from '@/components/ConflictResolver';
+
+// Placeholder Components (We will build these next)
+import { Dashboard } from '@/components/Dashboard';
+import { AddPage } from '@/pages/AddPage';
+import { AssetsPage } from '@/pages/AssetsPage';
+import { AssetDetailsPage } from '@/pages/AssetDetailsPage';
+import { LiquidAssetsPage } from '@/pages/LiquidAssetsPage';
+import { TransactionsPage } from '@/pages/TransactionsPage';
+import { SettingsPage } from '@/pages/SettingsPage';
+
+function AppLayout({ children }: { children: React.ReactNode }) {
+  const location = useLocation();
+
+  const navItems = [
+    { icon: LayoutDashboard, label: 'Dashboard', path: '/' },
+    { icon: Wallet, label: 'Assets', path: '/assets' },
+    { icon: PlusCircle, label: 'Add', path: '/add', highlight: true }, // Mobile FAB logic
+    { icon: ArrowRightLeft, label: 'Activity', path: '/transactions' },
+    { icon: Settings, label: 'Settings', path: '/settings' },
+  ];
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    sessionStorage.clear();
+    window.location.reload();
+  };
+
+  return (
+    <div className="flex min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-50">
+      {/* Desktop Sidebar */}
+      <aside className="hidden md:flex flex-col w-64 border-r bg-white dark:bg-slate-900 p-4 shadow-sm fixed h-full z-20">
+        <div className="flex items-center gap-2 mb-8 px-2">
+          <div className="bg-blue-600 p-2 rounded-lg">
+            <Wallet className="w-6 h-6 text-white" />
+          </div>
+          <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+            Asset Fortress
+          </h1>
+        </div>
+        
+        <nav className="flex-1 space-y-2">
+          {navItems.filter(i => i.label !== 'Add').map((item) => {
+            const isActive = location.pathname === item.path;
+            return (
+              <Link key={item.path} to={item.path}>
+                <Button 
+                  variant={isActive ? "secondary" : "ghost"} 
+                  className={`w-full justify-start gap-3 ${isActive ? 'bg-blue-50 text-blue-700 dark:bg-slate-800 dark:text-blue-400' : ''}`}
+                >
+                  <item.icon className="w-5 h-5" />
+                  {item.label}
+                </Button>
+              </Link>
+            )
+          })}
+        </nav>
+
+        <div className="pt-4 border-t">
+          <Button variant="ghost" className="w-full justify-start gap-3 text-red-600 hover:text-red-700 hover:bg-red-50" onClick={handleLogout}>
+            <LogOut className="w-5 h-5" />
+            Sign Out
+          </Button>
+        </div>
+      </aside>
+
+      {/* Main Content Area */}
+      <main className="flex-1 md:ml-64 pb-20 md:pb-4">
+        {children}
+      </main>
+
+      {/* Mobile Bottom Nav */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-slate-900 border-t flex justify-around p-2 z-50 safe-area-pb">
+        {navItems.map((item) => {
+          const isActive = location.pathname === item.path;
+          if (item.highlight) {
+            return (
+              <Link key={item.path} to={item.path} className="-mt-8">
+                <div className="bg-blue-600 text-white p-4 rounded-full shadow-lg hover:scale-105 transition-transform">
+                  <item.icon className="w-6 h-6" />
+                </div>
+              </Link>
+            )
+          }
+          return (
+            <Link key={item.path} to={item.path} className={`flex flex-col items-center p-2 min-w-[64px] ${isActive ? 'text-blue-600' : 'text-slate-500'}`}>
+              <item.icon className="w-6 h-6" />
+              <span className="text-[10px] font-medium mt-1">{item.label}</span>
+            </Link>
+          )
+        })}
+      </nav>
+    </div>
+  );
+}
 
 function App() {
-  const [session, setSession] = useState<User | null>(null)
-  const [loading, setLoading] = useState(true)
+  const [session, setSession] = useState<any>(null);
+  const [checking, setChecking] = useState(true);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session?.user ?? null)
-      setLoading(false)
-    })
+      setSession(session);
+      setChecking(false);
+    });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session?.user ?? null)
-    })
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
 
-    return () => subscription.unsubscribe()
-  }, [])
+    return () => subscription.unsubscribe();
+  }, []);
 
-  if (loading) {
+  if (checking) return <div className="h-screen flex items-center justify-center">Loading Fortress...</div>;
+
+  if (!session) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-      </div>
-    )
+      <>
+        <Toaster />
+        <Auth />
+      </>
+    );
+  }
+
+  // Check if Master Key is unlocked
+  const isUnlocked = sessionStorage.getItem('master_key');
+  if (!isUnlocked) {
+    // If logged in but MK missing (refresh), we need to re-enter password.
+    // We can reuse the Auth component but force it to Login state, 
+    // or typically we just sign them out to force a clean login flow for security.
+    supabase.auth.signOut();
+    return null; 
   }
 
   return (
-    <>
-      <Toaster position="top-center" />
-      {!session ? (
-        <Auth />
-      ) : (
-        <div className="min-h-screen bg-slate-50">
-          <header className="bg-white border-b border-slate-200 px-6 py-4 flex justify-between items-center">
-            <div className="flex items-center space-x-2">
-              <div className="bg-blue-600 p-2 rounded-lg">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5 text-white">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
-                </svg>
-              </div>
-              <h1 className="text-xl font-bold text-slate-900">Asset Manager</h1>
-            </div>
-            <div className="flex items-center space-x-4">
-              <span className="text-sm text-slate-500">{session.email}</span>
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => {
-                  supabase.auth.signOut()
-                  sessionStorage.removeItem('vault_password')
-                }}
-              >
-                Sign Out
-              </Button>
-            </div>
-          </header>
-          
-          <main className="container mx-auto p-8">
-            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-12 text-center">
-              <h2 className="text-2xl font-semibold text-slate-800 mb-2">Welcome to your Secure Vault</h2>
-              <p className="text-slate-500 mb-8 max-w-md mx-auto">
-                Phase 1 is complete. Your connection to Supabase is active, and your End-to-End Encryption engine is ready.
-              </p>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-left">
-                <div className="p-4 rounded-lg bg-blue-50 border border-blue-100">
-                  <div className="text-blue-600 font-bold mb-1">Authenticated</div>
-                  <div className="text-xs text-blue-700">Connected to Supabase via {session.email}</div>
-                </div>
-                <div className="p-4 rounded-lg bg-green-50 border border-green-100">
-                  <div className="text-green-600 font-bold mb-1">E2E Ready</div>
-                  <div className="text-xs text-green-700">AES-GCM encryption engine is fully functional.</div>
-                </div>
-                <div className="p-4 rounded-lg bg-purple-50 border border-purple-100">
-                  <div className="text-purple-600 font-bold mb-1">Encrypted Sync</div>
-                  <div className="text-xs text-purple-700">Vault password cached for current session.</div>
-                </div>
-              </div>
-            </div>
-          </main>
-        </div>
-      )}
-    </>
-  )
+    <BrowserRouter>
+      <AppLayout>
+        <Routes>
+          <Route path="/" element={<Dashboard />} />
+          <Route path="/assets" element={<AssetsPage />} />
+          <Route path="/liquid" element={<LiquidAssetsPage />} />
+          <Route path="/assets/:id" element={<AssetDetailsPage />} />
+          <Route path="/transactions" element={<TransactionsPage />} />
+          <Route path="/settings" element={<SettingsPage />} />
+          <Route path="/add" element={<AddPage />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </AppLayout>
+      <ConflictResolver />
+      <Toaster />
+    </BrowserRouter>
+  );
 }
 
-export default App
+export default App;

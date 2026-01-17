@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "gemini-deep-research": {
+      "command": "node /home/erro4/.gemini/extensions/gemini-deep-research/dist/index.js",
+      "args": []
+    }
+  }
+}

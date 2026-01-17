@@ -57,8 +57,8 @@ VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
 
 ## Roadmap Status
 
-*   **Phase 1: Foundation (Complete)** - Project setup, Auth, Crypto Engine.
-*   **Phase 2: Core Logic (Next)** - Porting FIFO/Tax logic, DB Schema, Offline Sync.
-*   **Phase 3: UI/UX** - Dashboard, Charts, Interactive Modes.
-*   **Phase 4: Automation** - Stock API, Currency conversion, CSV Import.
-*   **Phase 5: Release** - Testing, CI/CD, Audits.
+*   **Phase 1: Foundation (Complete)** - Project setup, Auth, Fortress Crypto Engine.
+*   **Phase 2: Core Logic (Complete)** - FIFO/Tax engine, Supabase Schema, Local Decryption Sync.
+*   **Phase 3: UI/UX (Complete)** - Responsive Dashboard, Asset/Liquid pages, Mobile Bottom Nav.
+*   **Phase 4: Automation (Complete)** - Historical Currency rates, Stock Ticker support, Conflict resolution.
+*   **Phase 5: Release (Current)** - Final polish, GitHub Actions, JSON Migration.

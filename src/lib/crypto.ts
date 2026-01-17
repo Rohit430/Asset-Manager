@@ -1,6 +1,8 @@
 /**
- * Professional End-to-End Encryption Engine (AES-GCM + PBKDF2)
- * Ensures data is encrypted locally before ever reaching the database.
+ * Fortress Crypto Engine v2
+ * Implements Master Key (MK) architecture with Recovery support.
+ * Data -> Encrypted with MK
+ * MK -> Encrypted with Password (stored in DB)
  */
 
 const ITERATIONS = 100000;
@@ -9,9 +11,17 @@ const SALT_LEN = 16;
 const IV_LEN = 12;
 
 /**
- * Derives a cryptographic key from a password and salt.
+ * Generates a cryptographically strong random Master Key.
  */
-async function deriveKey(password: string, salt: Uint8Array): Promise<CryptoKey> {
+export function generateMasterKey(): string {
+  const bytes = window.crypto.getRandomValues(new Uint8Array(32));
+  return btoa(String.fromCharCode(...bytes));
+}
+
+/**
+ * Derives a key from a password to wrap/unwrap the Master Key.
+ */
+async function deriveWrappingKey(password: string, salt: Uint8Array): Promise<CryptoKey> {
   const encoder = new TextEncoder();
   const passwordKey = await window.crypto.subtle.importKey(
     'raw',
@@ -24,7 +34,7 @@ async function deriveKey(password: string, salt: Uint8Array): Promise<CryptoKey>
   return window.crypto.subtle.deriveKey(
     {
       name: 'PBKDF2',
-      salt,
+      salt: salt.buffer as ArrayBuffer,
       iterations: ITERATIONS,
       hash: 'SHA-256',
     },
@@ -36,55 +46,115 @@ async function deriveKey(password: string, salt: Uint8Array): Promise<CryptoKey>
 }
 
 /**
- * Encrypts data using AES-GCM.
- * Payload structure: salt (16 bytes) + iv (12 bytes) + ciphertext
+ * Encrypts the Master Key using the user's password.
  */
-export async function encryptData(data: any, password: string): Promise<string> {
+export async function wrapMasterKey(masterKey: string, password: string): Promise<string> {
   const encoder = new TextEncoder();
-  const encodedData = encoder.encode(JSON.stringify(data));
-  
   const salt = window.crypto.getRandomValues(new Uint8Array(SALT_LEN));
   const iv = window.crypto.getRandomValues(new Uint8Array(IV_LEN));
   
-  const key = await deriveKey(password, salt);
-  
-  const ciphertext = await window.crypto.subtle.encrypt(
+  const wrappingKey = await deriveWrappingKey(password, salt);
+  const encryptedMK = await window.crypto.subtle.encrypt(
     { name: 'AES-GCM', iv },
-    key,
-    encodedData
+    wrappingKey,
+    encoder.encode(masterKey)
   );
 
-  const encryptedBuffer = new Uint8Array(salt.byteLength + iv.byteLength + ciphertext.byteLength);
-  encryptedBuffer.set(salt, 0);
-  encryptedBuffer.set(iv, salt.byteLength);
-  encryptedBuffer.set(new Uint8Array(ciphertext), salt.byteLength + iv.byteLength);
+  const buffer = new Uint8Array(salt.byteLength + iv.byteLength + encryptedMK.byteLength);
+  buffer.set(salt, 0);
+  buffer.set(iv, salt.byteLength);
+  buffer.set(new Uint8Array(encryptedMK), salt.byteLength + iv.byteLength);
 
-  return btoa(String.fromCharCode(...encryptedBuffer));
+  return btoa(String.fromCharCode(...buffer));
 }
 
 /**
- * Decrypts data using AES-GCM.
+ * Decrypts the Master Key using the user's password.
  */
-export async function decryptData(cipherText: string, password: string): Promise<any> {
+export async function unwrapMasterKey(wrappedKey: string, password: string): Promise<string> {
   try {
-    const encryptedBuffer = Uint8Array.from(atob(cipherText), c => c.charCodeAt(0));
-    
-    const salt = encryptedBuffer.slice(0, SALT_LEN);
-    const iv = encryptedBuffer.slice(SALT_LEN, SALT_LEN + IV_LEN);
-    const ciphertext = encryptedBuffer.slice(SALT_LEN + IV_LEN);
-    
-    const key = await deriveKey(password, salt);
-    
-    const decryptedBuffer = await window.crypto.subtle.decrypt(
+    const buffer = Uint8Array.from(atob(wrappedKey), c => c.charCodeAt(0));
+    const salt = buffer.slice(0, SALT_LEN);
+    const iv = buffer.slice(SALT_LEN, SALT_LEN + IV_LEN);
+    const ciphertext = buffer.slice(SALT_LEN + IV_LEN);
+
+    const wrappingKey = await deriveWrappingKey(password, salt);
+    const decrypted = await window.crypto.subtle.decrypt(
+      { name: 'AES-GCM', iv },
+      wrappingKey,
+      ciphertext
+    );
+
+    return new TextDecoder().decode(decrypted);
+  } catch (e) {
+    throw new Error('INVALID_PASSWORD');
+  }
+}
+
+/**
+ * Hashes the recovery key so we can verify it without storing the key itself.
+ */
+export async function hashRecoveryKey(recoveryKey: string): Promise<string> {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(recoveryKey);
+  const hash = await window.crypto.subtle.digest('SHA-256', data);
+  return btoa(String.fromCharCode(...new Uint8Array(hash)));
+}
+
+/**
+ * Standard data encryption using the Master Key.
+ */
+export async function encryptData(data: any, masterKey: string): Promise<string> {
+  const encoder = new TextEncoder();
+  const iv = window.crypto.getRandomValues(new Uint8Array(IV_LEN));
+  
+  const key = await window.crypto.subtle.importKey(
+    'raw',
+    Uint8Array.from(atob(masterKey), c => c.charCodeAt(0)),
+    'AES-GCM',
+    false,
+    ['encrypt']
+  );
+
+  const ciphertext = await window.crypto.subtle.encrypt(
+    { name: 'AES-GCM', iv },
+    key,
+    encoder.encode(JSON.stringify(data))
+  );
+
+  const buffer = new Uint8Array(iv.byteLength + ciphertext.byteLength);
+  buffer.set(iv, 0);
+  buffer.set(new Uint8Array(ciphertext), iv.byteLength);
+
+  return btoa(String.fromCharCode(...buffer));
+}
+
+/**
+ * Standard data decryption using the Master Key.
+ */
+export async function decryptData(cipherText: string, masterKey: string): Promise<any> {
+  try {
+    const buffer = Uint8Array.from(atob(cipherText), c => c.charCodeAt(0));
+    const iv = buffer.slice(0, IV_LEN);
+    const ciphertext = buffer.slice(IV_LEN);
+
+    const key = await window.crypto.subtle.importKey(
+      'raw',
+      Uint8Array.from(atob(masterKey), c => c.charCodeAt(0)),
+      'AES-GCM',
+      false,
+      ['decrypt']
+    );
+
+    const decrypted = await window.crypto.subtle.decrypt(
       { name: 'AES-GCM', iv },
       key,
       ciphertext
     );
-    
-    const decoder = new TextDecoder();
-    return JSON.parse(decoder.decode(decryptedBuffer));
-  } catch (error) {
-    console.error('Decryption failed. Incorrect password or corrupted data.', error);
+
+    return JSON.parse(new TextDecoder().decode(decrypted));
+  } catch (e) {
+    console.error('Decryption failed', e);
     throw new Error('DECRYPTION_FAILED');
   }
 }
