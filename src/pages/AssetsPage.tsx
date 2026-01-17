@@ -17,7 +17,7 @@ export function AssetsPage() {
     return assets.map(asset => {
       const assetTxs = transactions.filter(t => t.asset_id === asset.id);
       return rebuildAssetMetrics(asset, assetTxs);
-    }).filter(a => a.totalQuantity > 0.0001); // Only show active holdings
+    });
   }, [assets, transactions]);
 
   const filteredAssets = useMemo(() => {

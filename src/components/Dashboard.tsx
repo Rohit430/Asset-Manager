@@ -170,13 +170,11 @@ export function Dashboard() {
                 <h3 className="text-lg font-medium text-gray-900">Top Assets</h3>
              </div>
              
-             <div className="space-y-3">
-              {processedAssets
-                .filter(a => a.totalQuantity > 0)
-                .sort((a, b) => b.totalCost - a.totalCost)
-                .slice(0, 5)
-                .map(asset => (
-                  <div key={asset.id} className="p-3 border-t border-gray-200/50 flex items-center justify-between hover:bg-gray-50/50 transition-colors">
+                       <div className="space-y-3">
+                         {processedAssets
+                           .sort((a, b) => b.totalCost - a.totalCost)
+                           .slice(0, 5)
+                           .map(asset => (                  <div key={asset.id} className="p-3 border-t border-gray-200/50 flex items-center justify-between hover:bg-gray-50/50 transition-colors">
                     <div>
                       <h4 className="text-base font-medium text-blue-700">{asset.data.name} <span className="text-sm font-normal text-gray-500">{asset.country === 'India' ? '🇮🇳' : '🇺🇸'}</span></h4>
                       <p className="text-sm text-gray-500">Qty: <span className="font-medium">{asset.totalQuantity.toFixed(2)}</span> | Avg: ₹{asset.avgBuyPrice.toLocaleString('en-IN')}</p>
