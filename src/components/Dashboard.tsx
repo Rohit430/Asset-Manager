@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { useData } from '@/hooks/useData';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
-import { ArrowUpRight, ArrowDownRight, Wallet, CreditCard, PieChart as PieIcon, IndianRupee } from 'lucide-react';
+import { ArrowUpRight, ArrowDownRight, Wallet, CreditCard, PieChart as PieIcon } from 'lucide-react';
 import { rebuildAssetMetrics } from '@/lib/fifo';
 import { YearlySummary } from '@/components/YearlySummary';
 
@@ -138,7 +138,7 @@ export function Dashboard() {
                     paddingAngle={5}
                     dataKey="value"
                   >
-                    {chartData.map((entry, index) => (
+                    {chartData.map((_, index) => (
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
                   </Pie>

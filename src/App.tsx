@@ -3,7 +3,6 @@ import { HashRouter, Routes, Route, Navigate, useLocation, Link } from 'react-ro
 import { supabase } from '@/lib/supabase';
 import { Auth } from '@/components/Auth';
 import { LayoutDashboard, Wallet, ArrowRightLeft, Settings, PlusCircle, LogOut } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import { Toaster } from 'sonner';
 import { ConflictResolver } from '@/components/ConflictResolver';
 
