@@ -86,6 +86,8 @@ export function AddTransactionForm({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    // Validation: Asset ID is required.
+    // In edit mode, it should be pre-filled.
     if (!formData.assetId) return toast.error('Select an asset');
 
     setLoading(true);

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { HashRouter, Routes, Route, Navigate, useLocation, Link } from 'react-router-dom';
 import { supabase } from '@/lib/supabase';
 import { Auth } from '@/components/Auth';
-import { LayoutDashboard, Wallet, ArrowRightLeft, Settings, PlusCircle, LogOut } from 'lucide-react';
+import { LayoutDashboard, Wallet, ArrowRightLeft, Settings, PlusCircle } from 'lucide-react';
 import { Toaster } from 'sonner';
 import { ConflictResolver } from '@/components/ConflictResolver';
 
@@ -45,7 +45,7 @@ function AppLayout({ children }: { children: React.ReactNode }) {
               <h1 className="text-xl font-semibold">Asset Manager</h1>
             </div>
             
-            {/* Desktop Navigation */}
+            {/* Desktop Navigation - Exact Match to HTML */ }
             <div className="hidden md:flex items-center space-x-4">
               <Link to="/add">
                 <button className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-medium py-2 px-4 rounded-lg shadow-md hover:shadow-lg transition-all flex items-center space-x-2">
@@ -61,15 +61,27 @@ function AppLayout({ children }: { children: React.ReactNode }) {
               </Link>
 
               <Link to="/transactions" title="All Transactions" className="text-indigo-100 hover:text-white transition-colors">
-                <ArrowRightLeft className="w-6 h-6" />
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0ZM3.75 12h.007v.008H3.75V12Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm-.375 5.25h.007v.008H3.75v-.008Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
+                </svg>
               </Link>
 
+              <button title="Export Data" className="text-indigo-100 hover:text-white transition-colors">
+                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" />
+                </svg>
+              </button>
+
               <Link to="/settings" title="Settings" className="text-indigo-100 hover:text-white transition-colors">
-                <Settings className="w-6 h-6" />
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M10.343 3.94c.09-.542.56-1.002 1.13-1.226 1.13-1.226 2.403.09 2.403 1.226v.292c.318.078.636.17 1.002.27 1.13.303 1.386 1.83.606 2.61l-.25.25c-.44.44-.7.99-.7 1.61v.293c0 .69.56 1.25 1.25 1.25h.293c1.136 0 2.305 1.17 1.226 2.403-.224.57-.684 1.04-1.226 1.13v.292c0 1.136-1.273 2.403-2.403 1.226-.542-.09-1.002-.56-1.226-1.13a11.962 11.962 0 0 1-2.7 1.002c-1.13.303-1.83.606-2.61.606l-.25-.25c-.44-.44-.99-.7-1.61-.7h-.293c-.69 0-1.25.56-1.25 1.25v.293c0 1.136-1.17 2.305-2.403 1.226-.57-.224-1.04-.684-1.13-1.226v-.292c-.078-.318-.17-.636-.27-1.002-.303-1.13-.606-1.83.606-2.61l.25-.25c.44.44.7-.99.7-1.61v-.293c0-.69-.56-1.25-1.25-1.25h-.293c-1.136 0-2.305-1.17-1.226-2.403.224.57.684 1.04 1.226-1.13v-.292c0-1.136 1.273 2.403 2.403 1.226.542.09 1.002.56 1.226 1.13.938-.198 1.82-.51 2.7-1.002Z M12 15.75a3.75 3.75 0 1 0 0-7.5 3.75 3.75 0 0 0 0 7.5Z" />
+                </svg>
               </Link>
 
               <button onClick={handleLogout} title="Logout" className="text-indigo-100 hover:text-white transition-colors">
-                <LogOut className="w-6 h-6" />
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m-3-1.5-3-3m0 0 3-3m-3 3H21" />
+                </svg>
               </button>
             </div>
           </div>

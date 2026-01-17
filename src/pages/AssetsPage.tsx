@@ -5,27 +5,32 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { rebuildAssetMetrics } from '@/lib/fifo';
-import { Search, Plus, Filter, ArrowRight, Wallet } from 'lucide-react';
+import { Search, Plus, ArrowRight, Wallet } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+
 export function AssetsPage() {
-  const { assets, transactions, loading } = useData();
+  const { assets, transactions, preferences, loading } = useData();
   const [search, setSearch] = useState('');
+  const [typeFilter, setTypeFilter] = useState('All');
   const navigate = useNavigate();
 
   const processedAssets = useMemo(() => {
     return assets.map(asset => {
       const assetTxs = transactions.filter(t => t.asset_id === asset.id);
       return rebuildAssetMetrics(asset, assetTxs);
-    });
+    }).filter(a => a.totalQuantity > 0.0001 || a.totalCost > 0); 
   }, [assets, transactions]);
 
   const filteredAssets = useMemo(() => {
-    return processedAssets.filter(a => 
-      a.data.name.toLowerCase().includes(search.toLowerCase()) ||
-      a.type.toLowerCase().includes(search.toLowerCase())
-    ).sort((a, b) => b.totalCost - a.totalCost);
-  }, [processedAssets, search]);
+    return processedAssets.filter(a => {
+      const matchesSearch = a.data.name.toLowerCase().includes(search.toLowerCase()) || 
+                            a.type.toLowerCase().includes(search.toLowerCase());
+      const matchesType = typeFilter === 'All' || a.type === typeFilter;
+      return matchesSearch && matchesType;
+    }).sort((a, b) => b.totalCost - a.totalCost);
+  }, [processedAssets, search, typeFilter]);
 
   if (loading) return <div className="p-8 text-center text-slate-500">Decrypting assets...</div>;
 
@@ -59,9 +64,19 @@ export function AssetsPage() {
             onChange={e => setSearch(e.target.value)}
           />
         </div>
-        <Button variant="outline" size="icon">
-          <Filter className="w-4 h-4" />
-        </Button>
+        <div className="w-48">
+          <Select value={typeFilter} onValueChange={setTypeFilter}>
+            <SelectTrigger>
+              <SelectValue placeholder="Category" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="All">All Categories</SelectItem>
+              {(preferences?.categories || ["Equity", "Gold", "Mutual Fund", "Real Estate", "Bond"]).map(c => (
+                <SelectItem key={c} value={c}>{c}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">

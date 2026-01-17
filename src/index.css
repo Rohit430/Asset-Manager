@@ -14,25 +14,21 @@
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border: 1px solid rgba(229, 231, 235, 0.8);
-    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    /* No shadow in original CSS class, but used shadow-lg in HTML. Adding it here for consistency if class is used standalone */
   }
 
   .gradient-header {
     background-image: linear-gradient(to right, #1d4ed8, #3730a3); /* from-blue-700 to-indigo-800 */
   }
-
-  .btn-primary {
-    background-image: linear-gradient(to right, #3b82f6, #2563eb); /* from-blue-500 to-blue-600 */
-    color: white;
-    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-  }
-  
-  .btn-primary:hover {
-    background-image: linear-gradient(to right, #2563eb, #1d4ed8); /* hover:from-blue-600 hover:to-blue-700 */
-  }
 }
 
 body {
   font-family: 'Inter', sans-serif;
-  background-color: #f8fafc;
+  background-color: #f8fafc; /* bg-slate-50 */
+}
+
+/* Custom Scrollbar from original */
+.table-container {
+  max-height: 60vh;
+  overflow-y: auto;
 }

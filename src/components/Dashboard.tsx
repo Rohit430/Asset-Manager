@@ -2,7 +2,6 @@ import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useData } from '@/hooks/useData';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
-import { ArrowUpRight, ArrowDownRight, Wallet, CreditCard, PieChart as PieIcon } from 'lucide-react';
 import { rebuildAssetMetrics } from '@/lib/fifo';
 import { YearlySummary } from '@/components/YearlySummary';
 
@@ -67,22 +66,24 @@ export function Dashboard() {
         {syncing && <span className="text-xs text-indigo-500 font-medium animate-pulse">Syncing...</span>}
       </div>
 
-      {/* Summary Cards */}
+      {/* Summary Cards with Original HTML Gradients */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         
         {/* Total Investment */}
-        <div className="bg-gradient-to-br from-white to-gray-50 p-5 rounded-xl shadow-lg flex items-center justify-between border border-gray-100">
+        <div className="bg-gradient-to-br from-white to-gray-50 p-5 rounded-xl shadow-lg flex items-center justify-between">
           <div>
             <h3 className="text-sm font-medium text-gray-500 truncate">Total Investment</h3>
             <p className="mt-1 text-3xl font-semibold text-gray-900">₹{metrics.totalInvested.toLocaleString('en-IN')}</p>
           </div>
           <span className="bg-gradient-to-tr from-blue-500 to-blue-700 text-white p-3 rounded-full shadow-md">
-            <Wallet className="w-6 h-6" />
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v12m-3-2.818.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.82-2.64-2.05-2.64-3.565 0-1.513 1.255-2.73 2.772-2.73 1.282 0 2.45.83 2.875 2.04M12 6v12m-3-2.818" />
+            </svg>
           </span>
         </div>
 
         {/* Realized P/L */}
-        <div className="bg-gradient-to-br from-white to-gray-50 p-5 rounded-xl shadow-lg flex items-center justify-between border border-gray-100">
+        <div className="bg-gradient-to-br from-white to-gray-50 p-5 rounded-xl shadow-lg flex items-center justify-between">
           <div>
             <h3 className="text-sm font-medium text-gray-500 truncate">Total Realized P/L</h3>
             <p className={`mt-1 text-3xl font-semibold ${metrics.realizedPL >= 0 ? 'text-green-600' : 'text-red-600'}`}>
@@ -90,29 +91,35 @@ export function Dashboard() {
             </p>
           </div>
           <span className="bg-gradient-to-tr from-green-500 to-green-700 text-white p-3 rounded-full shadow-md">
-            {metrics.realizedPL >= 0 ? <ArrowUpRight className="w-6 h-6" /> : <ArrowDownRight className="w-6 h-6" />}
+             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
+                <path strokeLinecap="round" strokeLinejoin="round" d="m2.25 18 9-9 4.5 4.5L21.75 6" />
+            </svg>
           </span>
         </div>
 
         {/* Active Investments */}
-        <div className="bg-gradient-to-br from-white to-gray-50 p-5 rounded-xl shadow-lg flex items-center justify-between border border-gray-100">
+        <div className="bg-gradient-to-br from-white to-gray-50 p-5 rounded-xl shadow-lg flex items-center justify-between">
           <div>
             <h3 className="text-sm font-medium text-gray-500 truncate">Total Investments</h3>
             <p className="mt-1 text-3xl font-semibold text-gray-900">{metrics.activeCount}</p>
           </div>
           <span className="bg-gradient-to-tr from-indigo-500 to-indigo-700 text-white p-3 rounded-full shadow-md">
-            <PieIcon className="w-6 h-6" />
+             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18 9 11.25l4.306 4.306a11.95 11.95 0 0 1 5.814-5.518l2.74-1.22m0 0-5.94-2.281m5.94 2.28-2.28 5.941" />
+            </svg>
           </span>
         </div>
 
         {/* Broker Fee */}
-        <div className="bg-gradient-to-br from-white to-gray-50 p-5 rounded-xl shadow-lg flex items-center justify-between border border-gray-100">
+        <div className="bg-gradient-to-br from-white to-gray-50 p-5 rounded-xl shadow-lg flex items-center justify-between">
           <div>
             <h3 className="text-sm font-medium text-gray-500 truncate">Total Broker Fee</h3>
             <p className="mt-1 text-3xl font-semibold text-gray-900">₹0.00</p>
           </div>
           <span className="bg-gradient-to-tr from-red-500 to-red-700 text-white p-3 rounded-full shadow-md">
-            <CreditCard className="w-6 h-6" />
+             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 5.25h.008v.008H12v-.008Z" />
+            </svg>
           </span>
         </div>
       </div>
@@ -122,7 +129,7 @@ export function Dashboard() {
         {/* Left Column: Chart + Liquid Summary */}
         <div className="lg:col-span-2 space-y-6">
           {/* Chart Section */}
-          <div className="blurred-card p-6 rounded-xl">
+          <div className="blurred-card p-6 rounded-xl shadow-lg">
             <h3 className="text-lg font-medium text-gray-900 mb-4">Portfolio Distribution (by Cost)</h3>
             <div className="h-[300px] w-full">
               {chartData.length > 0 ? (
@@ -143,13 +150,7 @@ export function Dashboard() {
                     </Pie>
                     <Tooltip 
                       formatter={(value: any) => [`₹${value.toLocaleString('en-IN')}`, 'Value']}
-                      contentStyle={{ 
-                        borderRadius: '12px', 
-                        border: '1px solid rgba(255,255,255,0.5)', 
-                        boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
-                        backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                        backdropFilter: 'blur(4px)'
-                      }}
+                      contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
                     />
                     <Legend verticalAlign="bottom" height={36} iconType="circle" />
                   </PieChart>
@@ -163,17 +164,17 @@ export function Dashboard() {
           </div>
 
           {/* Liquid Assets Summary */}
-          <div className="blurred-card p-6 rounded-xl">
+          <div className="blurred-card p-6 rounded-xl shadow-lg">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-medium text-gray-900">Liquid Assets Summary</h3>
-              <button className="text-sm text-blue-600 hover:underline" onClick={() => navigate('/liquid')}>View Details</button>
+              <button className="text-sm text-blue-600 hover:underline" onClick={() => navigate('/liquid')}>View in Detail</button>
             </div>
             <div className="space-y-3">
               <div className="flex justify-between items-center p-2 border-b border-gray-100">
                 <span className="text-sm font-medium text-gray-600">Total Liquid</span>
                 <span className="text-sm font-bold text-gray-900">₹{metrics.liquidValue.toLocaleString('en-IN')}</span>
               </div>
-              {liquidAssets.length === 0 && <p className="text-xs text-gray-400 text-center py-2">No liquid assets added.</p>}
+              {liquidAssets.length === 0 && <p className="text-xs text-gray-400 text-center py-2">No liquid assets added yet.</p>}
             </div>
           </div>
         </div>
@@ -187,7 +188,7 @@ export function Dashboard() {
               .slice(0, 5);
 
             return (
-              <div key={category} className="blurred-card p-6 rounded-xl">
+              <div key={category} className="blurred-card p-6 rounded-xl shadow-lg">
                 <div className="flex justify-between items-center mb-4">
                   <h3 className="text-lg font-medium text-gray-900">{category}</h3>
                   {categoryAssets.length > 0 && (
@@ -209,9 +210,9 @@ export function Dashboard() {
                       <div className="flex items-center gap-3">
                         <div className="font-semibold text-gray-900">₹{asset.totalCost.toLocaleString('en-IN')}</div>
                         <div className="flex gap-1">
-                           <button onClick={() => navigate(`/assets/${asset.id}`)} className="px-2 py-1 text-xs bg-gray-200 hover:bg-gray-300 rounded text-gray-700">View</button>
-                           <button onClick={() => navigate(`/add?tab=transaction&type=Buy&asset=${asset.id}`)} className="px-2 py-1 text-xs bg-green-500 hover:bg-green-600 rounded text-white">Buy</button>
-                           <button onClick={() => navigate(`/add?tab=transaction&type=Sell&asset=${asset.id}`)} className="px-2 py-1 text-xs bg-red-500 hover:bg-red-600 rounded text-white">Sell</button>
+                           <button onClick={() => navigate(`/assets/${asset.id}`)} className="px-2 py-1 text-xs bg-gray-200 hover:bg-gray-300 rounded text-gray-700 transition-colors">View</button>
+                           <button onClick={() => navigate(`/add?tab=transaction&type=Buy&asset=${asset.id}`)} className="px-2 py-1 text-xs bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 rounded text-white shadow-sm transition-all">Buy</button>
+                           <button onClick={() => navigate(`/add?tab=transaction&type=Sell&asset=${asset.id}`)} className="px-2 py-1 text-xs bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 rounded text-white shadow-sm transition-all">Sell</button>
                         </div>
                       </div>
                     </div>
