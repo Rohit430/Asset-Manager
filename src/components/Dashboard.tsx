@@ -5,6 +5,8 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recha
 import { ArrowUpRight, ArrowDownRight, IndianRupee, Wallet } from 'lucide-react';
 import { rebuildAssetMetrics } from '@/lib/fifo';
 
+import { YearlySummary } from '@/components/YearlySummary';
+
 // Colors for the chart matching the original theme but modernized
 const COLORS = ['#2563EB', '#059669', '#D97706', '#DC2626', '#7C3AED', '#DB2777', '#0891B2'];
 
@@ -176,6 +178,8 @@ export function Dashboard() {
             </div>
           </CardContent>
         </Card>
+
+        <YearlySummary />
       </div>
     </div>
   );
