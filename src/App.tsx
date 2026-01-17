@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { BrowserRouter, Routes, Route, Navigate, useLocation, Link } from 'react-router-dom';
+import { HashRouter, Routes, Route, Navigate, useLocation, Link } from 'react-router-dom';
 import { supabase } from '@/lib/supabase';
 import { Auth } from '@/components/Auth';
 import { LayoutDashboard, Wallet, ArrowRightLeft, Settings, PlusCircle, LogOut } from 'lucide-react';
@@ -30,7 +30,8 @@ function AppLayout({ children }: { children: React.ReactNode }) {
   const handleLogout = async () => {
     await supabase.auth.signOut();
     sessionStorage.clear();
-    window.location.reload();
+    // Redirect to the base path (home) to ensure we don't end up on a 404
+    window.location.href = '/Asset-Manager/';
   };
 
   return (
@@ -147,7 +148,7 @@ function App() {
   }
 
   return (
-    <BrowserRouter>
+    <HashRouter>
       <AppLayout>
         <Routes>
           <Route path="/" element={<Dashboard />} />
@@ -162,7 +163,7 @@ function App() {
       </AppLayout>
       <ConflictResolver />
       <Toaster />
-    </BrowserRouter>
+    </HashRouter>
   );
 }
 

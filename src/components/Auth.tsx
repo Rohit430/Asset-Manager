@@ -46,7 +46,8 @@ export function Auth() {
       sessionStorage.setItem('master_key', masterKey)
       toast.success('Secure session initialized')
       // Force reload to clear any stale state and trigger App re-render
-      window.location.reload()
+      // We reload the current URL to ensure we stay on the correct base path
+      window.location.href = window.location.href
     } catch (err: any) {
       console.error(err)
       toast.error('Decryption failed. Check your password.')
