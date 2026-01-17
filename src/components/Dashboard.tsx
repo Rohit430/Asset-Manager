@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { useData } from '@/hooks/useData';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
-import { ArrowUpRight, ArrowDownRight, Wallet, CreditCard, PieChart as PieIcon } from 'lucide-react';
+import { ArrowUpRight, ArrowDownRight, Wallet, CreditCard, PieChart as PieIcon, IndianRupee } from 'lucide-react';
 import { rebuildAssetMetrics } from '@/lib/fifo';
 import { YearlySummary } from '@/components/YearlySummary';
 
@@ -53,7 +53,7 @@ export function Dashboard() {
     return (
       <div className="flex justify-center items-center h-64">
         <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-indigo-600"></div>
-        <span className="ml-3 text-lg text-gray-700">Loading vault...</span>
+        <span className="ml-3 text-lg text-gray-700">Loading assets...</span>
       </div>
     );
   }
@@ -69,7 +69,7 @@ export function Dashboard() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         
         {/* Total Investment */}
-        <div className="glass-card p-5 rounded-xl flex items-center justify-between">
+        <div className="bg-gradient-to-br from-white to-gray-50 p-5 rounded-xl shadow-lg flex items-center justify-between border border-gray-100">
           <div>
             <h3 className="text-sm font-medium text-gray-500 truncate">Total Investment</h3>
             <p className="mt-1 text-3xl font-semibold text-gray-900">₹{metrics.totalInvested.toLocaleString('en-IN')}</p>
@@ -85,22 +85,22 @@ export function Dashboard() {
         </div>
 
         {/* Realized P/L */}
-        <div className="glass-card p-5 rounded-xl flex items-center justify-between">
+        <div className="bg-gradient-to-br from-white to-gray-50 p-5 rounded-xl shadow-lg flex items-center justify-between border border-gray-100">
           <div>
             <h3 className="text-sm font-medium text-gray-500 truncate">Total Realized P/L</h3>
             <p className={`mt-1 text-3xl font-semibold ${metrics.realizedPL >= 0 ? 'text-green-600' : 'text-red-600'}`}>
               ₹{metrics.realizedPL.toLocaleString('en-IN')}
             </p>
           </div>
-          <span className={`bg-gradient-to-tr ${metrics.realizedPL >= 0 ? 'from-green-500 to-green-700' : 'from-red-500 to-red-700'} text-white p-3 rounded-full shadow-md`}>
+          <span className="bg-gradient-to-tr from-green-500 to-green-700 text-white p-3 rounded-full shadow-md">
             {metrics.realizedPL >= 0 ? <ArrowUpRight className="w-6 h-6" /> : <ArrowDownRight className="w-6 h-6" />}
           </span>
         </div>
 
         {/* Active Investments */}
-        <div className="glass-card p-5 rounded-xl flex items-center justify-between">
+        <div className="bg-gradient-to-br from-white to-gray-50 p-5 rounded-xl shadow-lg flex items-center justify-between border border-gray-100">
           <div>
-            <h3 className="text-sm font-medium text-gray-500 truncate">Active Investments</h3>
+            <h3 className="text-sm font-medium text-gray-500 truncate">Total Investments</h3>
             <p className="mt-1 text-3xl font-semibold text-gray-900">{metrics.activeCount}</p>
           </div>
           <span className="bg-gradient-to-tr from-indigo-500 to-indigo-700 text-white p-3 rounded-full shadow-md">
@@ -109,7 +109,7 @@ export function Dashboard() {
         </div>
 
         {/* Broker Fee Placeholder (Red) to match original */}
-        <div className="glass-card p-5 rounded-xl flex items-center justify-between">
+        <div className="bg-gradient-to-br from-white to-gray-50 p-5 rounded-xl shadow-lg flex items-center justify-between border border-gray-100">
           <div>
             <h3 className="text-sm font-medium text-gray-500 truncate">Total Broker Fee</h3>
             <p className="mt-1 text-3xl font-semibold text-gray-900">₹0.00</p>
@@ -123,8 +123,8 @@ export function Dashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
         
         {/* Chart Section */}
-        <div className="lg:col-span-2 glass-card p-6 rounded-xl">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Portfolio Distribution</h3>
+        <div className="lg:col-span-2 blurred-card p-6 rounded-xl">
+          <h3 className="text-lg font-medium text-gray-900 mb-4">Portfolio Distribution (by Cost)</h3>
           <div className="h-[300px] w-full">
             {chartData.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
@@ -138,7 +138,7 @@ export function Dashboard() {
                     paddingAngle={5}
                     dataKey="value"
                   >
-                    {chartData.map((_, index) => (
+                    {chartData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
                   </Pie>
@@ -157,39 +157,36 @@ export function Dashboard() {
               </ResponsiveContainer>
             ) : (
               <div className="h-full flex items-center justify-center text-gray-400">
-                No assets found.
+                No assets found. Add your first transaction to see the distribution.
               </div>
             )}
           </div>
         </div>
 
         {/* Top Assets List */}
-        <div className="lg:col-span-3 glass-card p-6 rounded-xl">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Top Assets</h3>
-          <div className="space-y-4">
-            {processedAssets
-              .filter(a => a.totalQuantity > 0)
-              .sort((a, b) => b.totalCost - a.totalCost)
-              .slice(0, 5)
-              .map(asset => (
-                <div key={asset.id} className="flex items-center p-3 hover:bg-slate-50 rounded-lg transition-colors border border-transparent hover:border-slate-100">
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold shadow-sm ${
-                    asset.type === 'Equity' ? 'bg-blue-500' :
-                    asset.type === 'Gold' ? 'bg-yellow-500' :
-                    asset.type === 'Mutual Fund' ? 'bg-purple-500' :
-                    'bg-slate-500'
-                  }`}>
-                    {asset.data.name.charAt(0)}
+        <div className="lg:col-span-3 space-y-6">
+          <div className="blurred-card p-6 rounded-xl">
+             <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-medium text-gray-900">Top Assets</h3>
+             </div>
+             
+             <div className="space-y-3">
+              {processedAssets
+                .filter(a => a.totalQuantity > 0)
+                .sort((a, b) => b.totalCost - a.totalCost)
+                .slice(0, 5)
+                .map(asset => (
+                  <div key={asset.id} className="p-3 border-t border-gray-200/50 flex items-center justify-between hover:bg-gray-50/50 transition-colors">
+                    <div>
+                      <h4 className="text-base font-medium text-blue-700">{asset.data.name} <span className="text-sm font-normal text-gray-500">{asset.country === 'India' ? '🇮🇳' : '🇺🇸'}</span></h4>
+                      <p className="text-sm text-gray-500">Qty: <span className="font-medium">{asset.totalQuantity.toFixed(2)}</span> | Avg: ₹{asset.avgBuyPrice.toLocaleString('en-IN')}</p>
+                    </div>
+                    <div className="font-semibold text-gray-900">₹{asset.totalCost.toLocaleString('en-IN')}</div>
                   </div>
-                  <div className="ml-4 space-y-1">
-                    <p className="text-sm font-semibold text-gray-900 leading-none">{asset.data.name}</p>
-                    <p className="text-xs text-gray-500">{asset.country === 'India' ? '🇮🇳' : '🇺🇸'} {asset.type}</p>
-                  </div>
-                  <div className="ml-auto font-bold text-gray-900">₹{asset.totalCost.toLocaleString('en-IN')}</div>
-                </div>
-              ))
-            }
-            {processedAssets.length === 0 && <div className="text-center text-sm text-gray-500 py-10">Nothing here yet.</div>}
+                ))
+              }
+              {processedAssets.length === 0 && <div className="text-center text-sm text-gray-500 py-10">Nothing here yet.</div>}
+             </div>
           </div>
         </div>
       </div>

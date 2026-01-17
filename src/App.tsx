@@ -22,81 +22,81 @@ function AppLayout({ children }: { children: React.ReactNode }) {
   const navItems = [
     { icon: LayoutDashboard, label: 'Dashboard', path: '/' },
     { icon: Wallet, label: 'Assets', path: '/assets' },
-    { icon: PlusCircle, label: 'Add', path: '/add', highlight: true }, // Mobile FAB logic
-    { icon: ArrowRightLeft, label: 'Activity', path: '/transactions' },
+    { icon: PlusCircle, label: 'Add', path: '/add', highlight: true },
+    { icon: ArrowRightLeft, label: 'Transactions', path: '/transactions' },
     { icon: Settings, label: 'Settings', path: '/settings' },
   ];
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
     sessionStorage.clear();
-    // Redirect to the base path (home) to ensure we don't end up on a 404
     window.location.href = '/Asset-Manager/';
   };
 
   return (
     <div className="min-h-screen bg-slate-50">
-      {/* Gradient Header */}
-      <header className="gradient-header sticky top-0 z-50">
+      {/* Header matching original prototype */}
+      <header className="gradient-header text-white shadow-md sticky top-0 z-50">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-3">
-              <span className="bg-white/20 p-2 rounded-lg backdrop-blur-sm">
-                <Wallet className="h-6 w-6 text-white" />
+              <span className="bg-white p-2 rounded-lg shadow">
+                <Wallet className="h-6 w-6 text-indigo-700" />
               </span>
-              <h1 className="text-xl font-semibold tracking-wide">Asset Manager</h1>
+              <h1 className="text-xl font-semibold">Asset Manager</h1>
             </div>
             
-            {/* Desktop Nav */}
-            <div className="hidden md:flex items-center space-x-1">
-              {navItems.filter(i => i.label !== 'Add').map((item) => {
-                const isActive = location.pathname === item.path;
-                return (
-                  <Link key={item.path} to={item.path}>
-                    <Button 
-                      variant="ghost" 
-                      className={`text-indigo-100 hover:text-white hover:bg-white/10 ${isActive ? 'bg-white/20 text-white shadow-sm' : ''}`}
-                    >
-                      <item.icon className="w-4 h-4 mr-2" />
-                      {item.label}
-                    </Button>
-                  </Link>
-                )
-              })}
-              <div className="h-6 w-px bg-white/20 mx-2" />
-              <Button variant="ghost" size="icon" className="text-indigo-100 hover:text-white hover:bg-white/10" onClick={handleLogout}>
-                <LogOut className="w-5 h-5" />
-              </Button>
-            </div>
+            {/* Desktop Navigation */}
+            <div className="hidden md:flex items-center space-x-4">
+              <Link to="/add">
+                <button className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-medium py-2 px-4 rounded-lg shadow-md hover:shadow-lg transition-all flex items-center space-x-2">
+                  <PlusCircle className="w-5 h-5" />
+                  <span>New Transaction</span>
+                </button>
+              </Link>
+              
+              <Link to="/liquid" title="Liquid Assets" className="text-indigo-100 hover:text-white transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M21 12a2.25 2.25 0 0 0-2.25-2.25H15a3 3 0 1 1-6 0H5.25A2.25 2.25 0 0 0 3 12m18 0v6a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 18v-6m18 0A2.25 2.25 0 0 0 18.75 9.75H5.25A2.25 2.25 0 0 0 3 12m18 0v-6A2.25 2.25 0 0 0 18.75 3.75H5.25A2.25 2.25 0 0 0 3 6v6" />
+                </svg>
+              </Link>
 
-            {/* Mobile Menu Button (Placeholder) */}
-            <div className="md:hidden">
-               {/* We keep the bottom nav for mobile as it is better UX, but style it to match */}
+              <Link to="/transactions" title="All Transactions" className="text-indigo-100 hover:text-white transition-colors">
+                <ArrowRightLeft className="w-6 h-6" />
+              </Link>
+
+              <Link to="/settings" title="Settings" className="text-indigo-100 hover:text-white transition-colors">
+                <Settings className="w-6 h-6" />
+              </Link>
+
+              <button onClick={handleLogout} title="Logout" className="text-indigo-100 hover:text-white transition-colors">
+                <LogOut className="w-6 h-6" />
+              </button>
             </div>
           </div>
         </div>
       </header>
 
-      {/* Main Content Area */}
+      {/* Main Content */}
       <main className="container mx-auto p-4 sm:p-6 lg:p-8 pb-24">
         {children}
       </main>
 
-      {/* Mobile Bottom Nav - Styled to match theme */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-lg border-t border-indigo-100 flex justify-around p-2 z-50 safe-area-pb shadow-lg">
+      {/* Mobile Bottom Nav */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-around p-2 z-50 shadow-lg safe-area-pb">
         {navItems.map((item) => {
           const isActive = location.pathname === item.path;
           if (item.highlight) {
             return (
               <Link key={item.path} to={item.path} className="-mt-8">
-                <div className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white p-4 rounded-full shadow-xl hover:scale-105 transition-transform border-4 border-slate-50">
+                <div className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white p-4 rounded-full shadow-lg hover:scale-105 transition-transform">
                   <item.icon className="w-6 h-6" />
                 </div>
               </Link>
             )
           }
           return (
-            <Link key={item.path} to={item.path} className={`flex flex-col items-center p-2 min-w-[64px] ${isActive ? 'text-indigo-700' : 'text-slate-400'}`}>
+            <Link key={item.path} to={item.path} className={`flex flex-col items-center p-2 min-w-[64px] ${isActive ? 'text-blue-600' : 'text-gray-400'}`}>
               <item.icon className="w-6 h-6" />
               <span className="text-[10px] font-medium mt-1">{item.label}</span>
             </Link>
