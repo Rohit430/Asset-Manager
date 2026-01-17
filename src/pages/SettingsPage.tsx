@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useData } from '@/hooks/useData';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -10,6 +11,7 @@ import { encryptData } from '@/lib/crypto';
 import { toast } from 'sonner';
 
 export function SettingsPage() {
+  const navigate = useNavigate();
   const { preferences, refresh } = useData();
   const [loading, setLoading] = useState(false);
   const [localPrefs, setLocalPrefs] = useState<any>(null);
@@ -49,9 +51,17 @@ export function SettingsPage() {
 
   return (
     <div className="p-4 md:p-8 space-y-6 max-w-4xl mx-auto">
-      <div>
-        <h2 className="text-3xl font-bold tracking-tight">Settings</h2>
-        <p className="text-muted-foreground">Configure your tax rules and app preferences</p>
+      <div className="flex justify-between items-center">
+        <div>
+          <h2 className="text-3xl font-bold text-gray-800">Settings</h2>
+          <p className="text-muted-foreground">Configure your tax rules and app preferences</p>
+        </div>
+        <Button 
+          className="bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 text-white font-medium py-2 px-4 rounded-lg shadow-md hover:shadow-lg transition-all"
+          onClick={() => navigate('/')}
+        >
+          &larr; Back to Dashboard
+        </Button>
       </div>
 
       <Tabs defaultValue="tax" className="w-full">

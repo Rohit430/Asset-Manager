@@ -31,11 +31,17 @@ export function TransactionsPage() {
 
   return (
     <div className="p-4 md:p-8 space-y-6 max-w-7xl mx-auto">
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-center mb-6">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight">Activity Log</h2>
+          <h2 className="text-3xl font-bold text-gray-800">All Transactions</h2>
           <p className="text-muted-foreground">Historical record of all transactions</p>
         </div>
+        <Button 
+          className="bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 text-white font-medium py-2 px-4 rounded-lg shadow-md hover:shadow-lg transition-all"
+          onClick={() => navigate('/')}
+        >
+          &larr; Back to Dashboard
+        </Button>
       </div>
 
       <div className="relative">

@@ -31,14 +31,22 @@ export function AssetsPage() {
 
   return (
     <div className="p-4 md:p-8 space-y-6 max-w-7xl mx-auto">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight">Your Assets</h2>
+          <h2 className="text-3xl font-bold text-gray-800">Your Assets</h2>
           <p className="text-muted-foreground">Detailed breakdown of current holdings</p>
         </div>
-        <Button onClick={() => navigate('/add')} className="gap-2">
-          <Plus className="w-4 h-4" /> New Investment
-        </Button>
+        <div className="flex gap-2">
+          <Button 
+            className="bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 text-white font-medium py-2 px-4 rounded-lg shadow-md hover:shadow-lg transition-all"
+            onClick={() => navigate('/')}
+          >
+            &larr; Back to Dashboard
+          </Button>
+          <Button onClick={() => navigate('/add')} className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-medium py-2 px-4 rounded-lg shadow-md hover:shadow-lg transition-all gap-2">
+            <Plus className="w-4 h-4" /> New Investment
+          </Button>
+        </div>
       </div>
 
       <div className="flex items-center gap-2">
