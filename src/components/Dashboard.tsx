@@ -67,7 +67,7 @@ export function Dashboard() {
         {syncing && <span className="text-xs text-indigo-500 font-medium animate-pulse">Syncing...</span>}
       </div>
 
-      {/* Summary Cards with Gradient Icons */}
+      {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         
         {/* Total Investment */}
@@ -105,7 +105,7 @@ export function Dashboard() {
           </span>
         </div>
 
-        {/* Broker Fee Placeholder (Red) to match original */}
+        {/* Broker Fee */}
         <div className="bg-gradient-to-br from-white to-gray-50 p-5 rounded-xl shadow-lg flex items-center justify-between border border-gray-100">
           <div>
             <h3 className="text-sm font-medium text-gray-500 truncate">Total Broker Fee</h3>
@@ -119,63 +119,66 @@ export function Dashboard() {
 
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
         
-        {/* Chart Section */}
-        <div className="lg:col-span-2 blurred-card p-6 rounded-xl">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Portfolio Distribution (by Cost)</h3>
-          <div className="h-[300px] w-full">
-            {chartData.length > 0 ? (
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={chartData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={60}
-                    outerRadius={80}
-                    paddingAngle={5}
-                    dataKey="value"
-                  >
-                    {chartData.map((_, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip 
-                    formatter={(value: any) => [`₹${value.toLocaleString('en-IN')}`, 'Value']}
-                    contentStyle={{ 
-                      borderRadius: '12px', 
-                      border: '1px solid rgba(255,255,255,0.5)', 
-                      boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
-                      backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                      backdropFilter: 'blur(4px)'
-                    }}
-                  />
-                  <Legend verticalAlign="bottom" height={36} iconType="circle" />
-                </PieChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="h-full flex items-center justify-center text-gray-400">
-                No assets found. Add your first transaction to see the distribution.
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Liquid Assets Summary (Restored) */}
-        <div className="blurred-card p-6 rounded-xl mt-6">
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="text-lg font-medium text-gray-900">Liquid Assets Summary</h3>
-          </div>
-          <div className="space-y-3">
-            <div className="flex justify-between items-center p-2 border-b border-gray-100">
-              <span className="text-sm font-medium text-gray-600">Total Liquid</span>
-              <span className="text-sm font-bold text-gray-900">₹{metrics.liquidValue.toLocaleString('en-IN')}</span>
+        {/* Left Column: Chart + Liquid Summary */}
+        <div className="lg:col-span-2 space-y-6">
+          {/* Chart Section */}
+          <div className="blurred-card p-6 rounded-xl">
+            <h3 className="text-lg font-medium text-gray-900 mb-4">Portfolio Distribution (by Cost)</h3>
+            <div className="h-[300px] w-full">
+              {chartData.length > 0 ? (
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={chartData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={60}
+                      outerRadius={80}
+                      paddingAngle={5}
+                      dataKey="value"
+                    >
+                      {chartData.map((_, index) => (
+                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip 
+                      formatter={(value: any) => [`₹${value.toLocaleString('en-IN')}`, 'Value']}
+                      contentStyle={{ 
+                        borderRadius: '12px', 
+                        border: '1px solid rgba(255,255,255,0.5)', 
+                        boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
+                        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                        backdropFilter: 'blur(4px)'
+                      }}
+                    />
+                    <Legend verticalAlign="bottom" height={36} iconType="circle" />
+                  </PieChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="h-full flex items-center justify-center text-gray-400">
+                  No assets found. Add your first transaction to see the distribution.
+                </div>
+              )}
             </div>
-            {liquidAssets.length === 0 && <p className="text-xs text-gray-400 text-center py-2">No liquid assets added.</p>}
+          </div>
+
+          {/* Liquid Assets Summary */}
+          <div className="blurred-card p-6 rounded-xl">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-medium text-gray-900">Liquid Assets Summary</h3>
+              <button className="text-sm text-blue-600 hover:underline" onClick={() => navigate('/liquid')}>View Details</button>
+            </div>
+            <div className="space-y-3">
+              <div className="flex justify-between items-center p-2 border-b border-gray-100">
+                <span className="text-sm font-medium text-gray-600">Total Liquid</span>
+                <span className="text-sm font-bold text-gray-900">₹{metrics.liquidValue.toLocaleString('en-IN')}</span>
+              </div>
+              {liquidAssets.length === 0 && <p className="text-xs text-gray-400 text-center py-2">No liquid assets added.</p>}
+            </div>
           </div>
         </div>
-        </div>
 
-        {/* Category Cards (Right Column) */}
+        {/* Right Column: Category Cards */}
         <div className="lg:col-span-3 space-y-6">
           {(preferences?.categories || ["Equity", "Gold", "Mutual Fund", "Real Estate", "Bond"]).map(category => {
             const categoryAssets = processedAssets
@@ -188,7 +191,7 @@ export function Dashboard() {
                 <div className="flex justify-between items-center mb-4">
                   <h3 className="text-lg font-medium text-gray-900">{category}</h3>
                   {categoryAssets.length > 0 && (
-                    <button className="text-sm text-blue-600 hover:underline">View More</button>
+                    <button className="text-sm text-blue-600 hover:underline" onClick={() => navigate('/assets')}>View More</button>
                   )}
                 </div>
                 
@@ -205,7 +208,6 @@ export function Dashboard() {
                       </div>
                       <div className="flex items-center gap-3">
                         <div className="font-semibold text-gray-900">₹{asset.totalCost.toLocaleString('en-IN')}</div>
-                        {/* Quick Actions (Matching Screenshot) */}
                         <div className="flex gap-1">
                            <button onClick={() => navigate(`/assets/${asset.id}`)} className="px-2 py-1 text-xs bg-gray-200 hover:bg-gray-300 rounded text-gray-700">View</button>
                            <button onClick={() => navigate(`/add?tab=transaction&type=Buy&asset=${asset.id}`)} className="px-2 py-1 text-xs bg-green-500 hover:bg-green-600 rounded text-white">Buy</button>
