@@ -33,8 +33,17 @@ export function LiquidAssetsPage() {
           >
             &larr; Back to Dashboard
           </Button>
-          <Button className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-medium py-2 px-4 rounded-lg shadow-md hover:shadow-lg transition-all gap-2" onClick={() => navigate('/add?tab=liquid')}>
-            <Plus className="w-4 h-4" /> Add Entry
+          <Button 
+            className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-medium py-2 px-4 rounded-lg shadow-md hover:shadow-lg transition-all gap-2" 
+            onClick={() => navigate('/add?tab=liquid&type=Cash')}
+          >
+            <Plus className="w-4 h-4" /> Add Cash Entry
+          </Button>
+          <Button 
+            className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-medium py-2 px-4 rounded-lg shadow-md hover:shadow-lg transition-all gap-2" 
+            onClick={() => navigate('/add?tab=liquid&type=FD')}
+          >
+            <Plus className="w-4 h-4" /> Add FD Entry
           </Button>
         </div>
       </div>

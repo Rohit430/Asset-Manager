@@ -169,12 +169,40 @@ export function Dashboard() {
               <h3 className="text-lg font-medium text-gray-900">Liquid Assets Summary</h3>
               <button className="text-sm text-blue-600 hover:underline" onClick={() => navigate('/liquid')}>View in Detail</button>
             </div>
-            <div className="space-y-3">
-              <div className="flex justify-between items-center p-2 border-b border-gray-100">
-                <span className="text-sm font-medium text-gray-600">Total Liquid</span>
-                <span className="text-sm font-bold text-gray-900">₹{metrics.liquidValue.toLocaleString('en-IN')}</span>
-              </div>
-              {liquidAssets.length === 0 && <p className="text-xs text-gray-400 text-center py-2">No liquid assets added yet.</p>}
+            
+            <div className="overflow-hidden border border-gray-200 rounded-lg">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Bank</th>
+                    <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase">Savings</th>
+                    <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase">FD</th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {Object.entries(
+                    liquidAssets.reduce((acc: any, asset) => {
+                      const data = asset.data as any;
+                      const bank = data.bank || 'Other';
+                      if (!acc[bank]) acc[bank] = { savings: 0, fd: 0 };
+                      if (asset.type === 'Cash') acc[bank].savings += data.amount || 0;
+                      if (asset.type === 'FD') acc[bank].fd += data.startAmount || 0;
+                      return acc;
+                    }, {})
+                  ).map(([bank, data]: [string, any]) => (
+                    <tr key={bank}>
+                      <td className="px-3 py-2 text-sm font-medium text-gray-900">{bank}</td>
+                      <td className="px-3 py-2 text-sm text-right text-gray-700">₹{data.savings.toLocaleString('en-IN')}</td>
+                      <td className="px-3 py-2 text-sm text-right text-gray-700">₹{data.fd.toLocaleString('en-IN')}</td>
+                    </tr>
+                  ))}
+                  {liquidAssets.length === 0 && (
+                    <tr>
+                      <td colSpan={3} className="px-3 py-4 text-center text-xs text-gray-500">No liquid assets added yet.</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
             </div>
           </div>
         </div>
@@ -192,7 +220,12 @@ export function Dashboard() {
                 <div className="flex justify-between items-center mb-4">
                   <h3 className="text-lg font-medium text-gray-900">{category}</h3>
                   {categoryAssets.length > 0 && (
-                    <button className="text-sm text-blue-600 hover:underline" onClick={() => navigate('/assets')}>View More</button>
+                    <button 
+                      className="text-sm text-blue-600 hover:underline" 
+                      onClick={() => navigate(`/assets?category=${encodeURIComponent(category)}`)}
+                    >
+                      View More
+                    </button>
                   )}
                 </div>
                 

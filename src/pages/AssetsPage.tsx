@@ -10,11 +10,15 @@ import { useNavigate } from 'react-router-dom';
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
+import { useSearchParams } from 'react-router-dom';
+
 export function AssetsPage() {
   const { assets, transactions, preferences, loading } = useData();
-  const [search, setSearch] = useState('');
-  const [typeFilter, setTypeFilter] = useState('All');
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  
+  const [search, setSearch] = useState('');
+  const [typeFilter, setTypeFilter] = useState(searchParams.get('category') || 'All');
 
   const processedAssets = useMemo(() => {
     return assets.map(asset => {
