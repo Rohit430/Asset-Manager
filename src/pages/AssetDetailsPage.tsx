@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { rebuildAssetMetrics } from '@/lib/fifo';
-import { ChevronLeft, TrendingUp, TrendingDown, Clock, Tag } from 'lucide-react';
+import { ChevronLeft, TrendingUp, TrendingDown, Clock, Tag, Edit2 } from 'lucide-react';
 import { format } from 'date-fns';
 
 export function AssetDetailsPage() {
@@ -99,6 +99,7 @@ export function AssetDetailsPage() {
                 <th className="p-4 text-right font-medium">Quantity</th>
                 <th className="p-4 text-right font-medium">Price</th>
                 <th className="p-4 text-right font-medium">Net P/L</th>
+                <th className="p-4 text-right font-medium">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -121,6 +122,11 @@ export function AssetDetailsPage() {
                   </td>
                   <td className={`p-4 text-right font-medium ${tx.data.netProfit && tx.data.netProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                     {tx.data.netProfit ? `₹${tx.data.netProfit.toLocaleString('en-IN')}` : '—'}
+                  </td>
+                  <td className="p-4 text-right">
+                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => navigate(`/add?tab=transaction&editId=${tx.id}`)}>
+                      <Edit2 className="w-3 h-3 text-slate-400" />
+                    </Button>
                   </td>
                 </tr>
               ))}

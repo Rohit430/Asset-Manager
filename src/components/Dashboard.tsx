@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useData } from '@/hooks/useData';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 import { ArrowUpRight, ArrowDownRight, Wallet, CreditCard, PieChart as PieIcon } from 'lucide-react';
@@ -9,7 +10,8 @@ import { YearlySummary } from '@/components/YearlySummary';
 const COLORS = ['#2563EB', '#059669', '#D97706', '#DC2626', '#7C3AED', '#DB2777', '#0891B2'];
 
 export function Dashboard() {
-  const { assets, transactions, liquidAssets, loading, syncing } = useData();
+  const { assets, transactions, liquidAssets, preferences, loading, syncing } = useData();
+  const navigate = useNavigate();
 
   const processedAssets = useMemo(() => {
     return assets.map(asset => {
@@ -34,7 +36,7 @@ export function Dashboard() {
     const liquidValue = liquidAssets.reduce((acc, a) => acc + (a.data.amount || 0), 0);
 
     return { 
-      totalInvested: investedAssetsValue + liquidValue, 
+      totalInvested: investedAssetsValue, 
       investedAssetsValue,
       liquidValue,
       realizedPL, 
@@ -73,11 +75,6 @@ export function Dashboard() {
           <div>
             <h3 className="text-sm font-medium text-gray-500 truncate">Total Investment</h3>
             <p className="mt-1 text-3xl font-semibold text-gray-900">₹{metrics.totalInvested.toLocaleString('en-IN')}</p>
-            <div className="flex gap-2 text-[10px] text-gray-400 mt-1">
-              <span>Assets: ₹{metrics.investedAssetsValue.toLocaleString('en-IN', { maximumFractionDigits: 0, notation: 'compact' })}</span>
-              <span>•</span>
-              <span>Liquid: ₹{metrics.liquidValue.toLocaleString('en-IN', { maximumFractionDigits: 0, notation: 'compact' })}</span>
-            </div>
           </div>
           <span className="bg-gradient-to-tr from-blue-500 to-blue-700 text-white p-3 rounded-full shadow-md">
             <Wallet className="w-6 h-6" />
@@ -163,29 +160,69 @@ export function Dashboard() {
           </div>
         </div>
 
-        {/* Top Assets List */}
-        <div className="lg:col-span-3 space-y-6">
-          <div className="blurred-card p-6 rounded-xl">
-             <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-medium text-gray-900">Top Assets</h3>
-             </div>
-             
-                       <div className="space-y-3">
-                         {processedAssets
-                           .sort((a, b) => b.totalCost - a.totalCost)
-                           .slice(0, 5)
-                           .map(asset => (                  <div key={asset.id} className="p-3 border-t border-gray-200/50 flex items-center justify-between hover:bg-gray-50/50 transition-colors">
-                    <div>
-                      <h4 className="text-base font-medium text-blue-700">{asset.data.name} <span className="text-sm font-normal text-gray-500">{asset.country === 'India' ? '🇮🇳' : '🇺🇸'}</span></h4>
-                      <p className="text-sm text-gray-500">Qty: <span className="font-medium">{asset.totalQuantity.toFixed(2)}</span> | Avg: ₹{asset.avgBuyPrice.toLocaleString('en-IN')}</p>
-                    </div>
-                    <div className="font-semibold text-gray-900">₹{asset.totalCost.toLocaleString('en-IN')}</div>
-                  </div>
-                ))
-              }
-              {processedAssets.length === 0 && <div className="text-center text-sm text-gray-500 py-10">Nothing here yet.</div>}
-             </div>
+        {/* Liquid Assets Summary (Restored) */}
+        <div className="blurred-card p-6 rounded-xl mt-6">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-lg font-medium text-gray-900">Liquid Assets Summary</h3>
           </div>
+          <div className="space-y-3">
+            <div className="flex justify-between items-center p-2 border-b border-gray-100">
+              <span className="text-sm font-medium text-gray-600">Total Liquid</span>
+              <span className="text-sm font-bold text-gray-900">₹{metrics.liquidValue.toLocaleString('en-IN')}</span>
+            </div>
+            {liquidAssets.length === 0 && <p className="text-xs text-gray-400 text-center py-2">No liquid assets added.</p>}
+          </div>
+        </div>
+        </div>
+
+        {/* Category Cards (Right Column) */}
+        <div className="lg:col-span-3 space-y-6">
+          {(preferences?.categories || ["Equity", "Gold", "Mutual Fund", "Real Estate", "Bond"]).map(category => {
+            const categoryAssets = processedAssets
+              .filter(a => a.type === category && a.totalQuantity > 0)
+              .sort((a, b) => b.totalCost - a.totalCost)
+              .slice(0, 5);
+
+            return (
+              <div key={category} className="blurred-card p-6 rounded-xl">
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-lg font-medium text-gray-900">{category}</h3>
+                  {categoryAssets.length > 0 && (
+                    <button className="text-sm text-blue-600 hover:underline">View More</button>
+                  )}
+                </div>
+                
+                <div className="space-y-3">
+                  {categoryAssets.map(asset => (
+                    <div key={asset.id} className="p-3 border-t border-gray-200/50 flex items-center justify-between hover:bg-gray-50/50 transition-colors">
+                      <div>
+                        <h4 className="text-base font-medium text-blue-700">
+                          {asset.data.name} <span className="text-sm font-normal text-gray-500">{asset.country === 'India' ? '🇮🇳' : '🇺🇸'}</span>
+                        </h4>
+                        <p className="text-sm text-gray-500">
+                          Qty: <span className="font-medium">{asset.totalQuantity.toFixed(2)}</span> | Avg: ₹{asset.avgBuyPrice.toLocaleString('en-IN')}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <div className="font-semibold text-gray-900">₹{asset.totalCost.toLocaleString('en-IN')}</div>
+                        {/* Quick Actions (Matching Screenshot) */}
+                        <div className="flex gap-1">
+                           <button onClick={() => navigate(`/assets/${asset.id}`)} className="px-2 py-1 text-xs bg-gray-200 hover:bg-gray-300 rounded text-gray-700">View</button>
+                           <button onClick={() => navigate(`/add?tab=transaction&type=Buy&asset=${asset.id}`)} className="px-2 py-1 text-xs bg-green-500 hover:bg-green-600 rounded text-white">Buy</button>
+                           <button onClick={() => navigate(`/add?tab=transaction&type=Sell&asset=${asset.id}`)} className="px-2 py-1 text-xs bg-red-500 hover:bg-red-600 rounded text-white">Sell</button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                  {categoryAssets.length === 0 && (
+                    <div className="text-center text-sm text-gray-500 py-6">
+                      No {category.toLowerCase()} investments yet.
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
 

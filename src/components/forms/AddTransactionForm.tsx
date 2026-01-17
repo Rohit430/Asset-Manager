@@ -9,21 +9,36 @@ import { calculateSellPreview } from '@/lib/fifo';
 import { toast } from 'sonner';
 import { rebuildAssetMetrics } from '@/lib/fifo';
 
-export function AddTransactionForm({ onSuccess }: { onSuccess: () => void }) {
-  const { assets, transactions, addTransaction, preferences } = useData();
+export function AddTransactionForm({ 
+  onSuccess,
+  initialType,
+  initialAssetId,
+  editTxId
+}: { 
+  onSuccess: () => void;
+  initialType?: string | null;
+  initialAssetId?: string | null;
+  editTxId?: string | null;
+}) {
+  const { assets, transactions, addTransaction, updateTransaction, preferences } = useData();
   const [loading, setLoading] = useState(false);
   const [sellPreview, setSellPreview] = useState<any>(null);
   
+  // Edit Mode Initialization
+  const existingTx = useMemo(() => {
+    return editTxId ? transactions.find(t => t.id === editTxId) : null;
+  }, [editTxId, transactions]);
+
   const [formData, setFormData] = useState({
-    assetId: '',
-    type: 'Buy',
-    date: new Date().toISOString().split('T')[0],
-    quantity: '',
-    price: '', // This will be the Original Price input
-    currency: 'INR',
-    exchangeRate: '1',
-    fees: '0',
-    notes: ''
+    assetId: existingTx ? existingTx.asset_id : (initialAssetId || ''),
+    type: existingTx ? existingTx.type : (initialType || 'Buy'),
+    date: existingTx ? existingTx.tx_date : new Date().toISOString().split('T')[0],
+    quantity: existingTx ? existingTx.data.quantity.toString() : '',
+    price: existingTx ? (existingTx.data.originalPrice || existingTx.data.price).toString() : '',
+    currency: existingTx ? (existingTx.data.currency || 'INR') : 'INR',
+    exchangeRate: existingTx ? (existingTx.data.exchangeRate || 1).toString() : '1',
+    fees: existingTx ? existingTx.data.miscCosts.toString() : '0',
+    notes: existingTx ? (existingTx.data.notes || '') : ''
   });
 
   // Calculate Base Price (INR)
@@ -38,9 +53,10 @@ export function AddTransactionForm({ onSuccess }: { onSuccess: () => void }) {
     if (!formData.assetId) return null;
     const asset = assets.find(a => a.id === formData.assetId);
     if (!asset) return null;
-    const assetTxs = transactions.filter(t => t.asset_id === asset.id);
+    // Exclude current TX from metrics if editing, to prevent double counting issues during validation
+    const assetTxs = transactions.filter(t => t.asset_id === asset.id && t.id !== editTxId);
     return rebuildAssetMetrics(asset, assetTxs);
-  }, [formData.assetId, assets, transactions]);
+  }, [formData.assetId, assets, transactions, editTxId]);
 
   // Real-time Sell Preview
   const handlePreview = () => {
@@ -106,20 +122,27 @@ export function AddTransactionForm({ onSuccess }: { onSuccess: () => void }) {
         });
       }
 
-      await addTransaction(formData.assetId, formData.type, formData.date, txData);
+      if (existingTx) {
+        await updateTransaction(existingTx, txData);
+      } else {
+        await addTransaction(formData.assetId, formData.type, formData.date, txData);
+      }
       
-      setFormData({
-        assetId: '',
-        type: 'Buy',
-        date: new Date().toISOString().split('T')[0],
-        quantity: '',
-        price: '',
-        currency: 'INR',
-        exchangeRate: '1',
-        fees: '0',
-        notes: ''
-      });
-      setSellPreview(null);
+      if (!existingTx) {
+        setFormData({
+          assetId: '',
+          type: 'Buy',
+          date: new Date().toISOString().split('T')[0],
+          quantity: '',
+          price: '',
+          currency: 'INR',
+          exchangeRate: '1',
+          fees: '0',
+          notes: ''
+        });
+        setSellPreview(null);
+      }
+      
       onSuccess();
     } catch (e: any) {
       toast.error(e.message);
@@ -131,7 +154,7 @@ export function AddTransactionForm({ onSuccess }: { onSuccess: () => void }) {
   return (
     <Card className="w-full border-none shadow-none">
       <CardHeader>
-        <CardTitle>Record Transaction</CardTitle>
+        <CardTitle>{existingTx ? 'Update Transaction' : 'Record Transaction'}</CardTitle>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -149,6 +172,7 @@ export function AddTransactionForm({ onSuccess }: { onSuccess: () => void }) {
                   exchangeRate: asset?.country === 'India' ? '1' : '83' // Quick default
                 });
               }}
+              disabled={!!existingTx} // Lock asset on edit for simplicity
             >
               <SelectTrigger>
                 <SelectValue placeholder="Search asset..." />
@@ -177,6 +201,7 @@ export function AddTransactionForm({ onSuccess }: { onSuccess: () => void }) {
                   setFormData({...formData, type: v});
                   setSellPreview(null);
                 }}
+                disabled={!!existingTx} // Lock type on edit
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -298,7 +323,7 @@ export function AddTransactionForm({ onSuccess }: { onSuccess: () => void }) {
           )}
 
           <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? 'Processing...' : `Confirm ${formData.type}`}
+            {loading ? 'Processing...' : (existingTx ? 'Update Transaction' : `Confirm ${formData.type}`)}
           </Button>
         </form>
       </CardContent>

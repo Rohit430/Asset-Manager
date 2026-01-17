@@ -3,12 +3,15 @@ import { useData } from '@/hooks/useData';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Search, ArrowUpCircle, ArrowDownCircle, Info } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Search, ArrowUpCircle, ArrowDownCircle, Info, Edit2 } from 'lucide-react';
 import { format } from 'date-fns';
+import { useNavigate } from 'react-router-dom';
 
 export function TransactionsPage() {
   const { assets, transactions, loading } = useData();
   const [search, setSearch] = useState('');
+  const navigate = useNavigate();
 
   const displayTransactions = useMemo(() => {
     return transactions.map(tx => {
@@ -98,6 +101,10 @@ export function TransactionsPage() {
                     </p>
                   </div>
                 )}
+                
+                <Button variant="ghost" size="icon" onClick={() => navigate(`/add?tab=transaction&editId=${tx.id}`)}>
+                  <Edit2 className="w-4 h-4 text-slate-400" />
+                </Button>
               </div>
             </CardContent>
           </Card>
