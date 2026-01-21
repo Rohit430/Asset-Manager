@@ -1,0 +1,1837 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-purple-50">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iris Asset Manager</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+    <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #faf5ff; /* bg-purple-50 */
+        }
+        /* Custom scrollbar for transaction lists */
+        .modal-body, .table-container {
+            max-height: 60vh;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: #d8b4fe #faf5ff;
+        }
+        .table-container::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        .table-container::-webkit-scrollbar-track {
+            background: #faf5ff;
+        }
+        .table-container::-webkit-scrollbar-thumb {
+            background-color: #d8b4fe;
+            border-radius: 4px;
+        }
+
+        /* Hide number input arrows */
+        input[type=number]::-webkit-inner-spin-button,
+        input[type=number]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+        /* Hide views by default */
+        .app-view {
+            display: none;
+        }
+        /* For truncating notes in tables */
+        .truncate {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 150px; /* Adjust as needed */
+        }
+        /* Custom class for blurred cards */
+        .blurred-card {
+            background-color: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(168, 85, 247, 0.2); /* Purple border */
+        }
+        .glass-header {
+            background: linear-gradient(135deg, #7e22ce 0%, #581c87 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        .glass-header::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            /* Fix: pointer-events: none ensures clicks pass through the overlay */
+            pointer-events: none; 
+            background: url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.05' fill-rule='evenodd'%3E%3Ccircle cx='3' cy='3' r='3'/%3E%3Ccircle cx='13' cy='13' r='3'/%3E%3C/g%3E%3C/svg%3E");
+        }
+    </style>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#faf5ff',
+                            100: '#f3e8ff',
+                            200: '#e9d5ff',
+                            300: '#d8b4fe',
+                            400: '#c084fc',
+                            500: '#a855f7',
+                            600: '#9333ea',
+                            700: '#7e22ce',
+                            800: '#6b21a8',
+                            900: '#581c87',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+
+<body class="h-full text-gray-800">
+    <!-- LOGIN VIEW -->
+    <div id="login-view" class="flex min-h-screen flex-col justify-center items-center bg-brand-50 p-4 relative overflow-hidden">
+        <!-- decorative background elements -->
+        <div class="absolute top-0 left-0 w-full h-64 bg-brand-900 rounded-b-[3rem] shadow-xl z-0"></div>
+        
+        <div class="w-full max-w-md z-10">
+            <div class="bg-white p-8 rounded-2xl shadow-2xl border border-brand-100">
+                <div class="flex flex-col items-center mb-8">
+                    <span class="bg-gradient-to-br from-brand-600 to-brand-800 p-4 rounded-full shadow-lg mb-4 ring-4 ring-brand-100">
+                        <!-- New Financial Icon: Growth Bars -->
+                        <svg class="h-10 w-10 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M18.375 2.25c-1.035 0-1.875.84-1.875 1.875v15.75c0 1.035.84 1.875 1.875 1.875h.75c1.035 0 1.875-.84 1.875-1.875V4.125c0-1.035-.84-1.875-1.875-1.875h-.75ZM9.75 8.625c0-1.035.84-1.875 1.875-1.875h.75c1.035 0 1.875.84 1.875 1.875v11.25c0 1.035-.84 1.875-1.875 1.875h-.75a1.875 1.875 0 0 1-1.875-1.875V8.625ZM3 13.125c0-1.035.84-1.875 1.875-1.875h.75c1.035 0 1.875.84 1.875 1.875v6.75c0 1.035-.84 1.875-1.875 1.875h-.75A1.875 1.875 0 0 1 3 19.875v-6.75Z" />
+                        </svg>
+                    </span>
+                    <h1 class="text-3xl font-bold text-brand-900 tracking-tight">Iris</h1>
+                    <p class="text-brand-500 font-medium mt-1">Asset Manager</p>
+                </div>
+                
+                <form id="login-form" class="space-y-5">
+                    <div>
+                        <label for="username" class="block text-sm font-semibold text-gray-700 mb-1">Username</label>
+                        <input type="text" id="username" name="username" class="block w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all" required>
+                    </div>
+                    <div>
+                        <label for="password" class="block text-sm font-semibold text-gray-700 mb-1">Password</label>
+                        <input type="password" id="password" name="password" class="block w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all" required>
+                    </div>
+                    
+                    <div id="login-error" class="text-sm bg-red-50 text-red-600 p-3 rounded-lg border border-red-100 flex items-center hidden">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        Invalid credentials.
+                    </div>
+                    
+                    <button type="submit" class="w-full bg-gradient-to-r from-brand-700 to-brand-900 hover:from-brand-800 hover:to-brand-950 text-white font-bold py-3.5 px-4 rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500">
+                        Sign In securely
+                    </button>
+                </form>
+            </div>
+            <p class="text-center text-brand-800/60 text-xs mt-6">Secured by Iris Infrastructure</p>
+        </div>
+    </div>
+
+    <!-- MAIN APP CONTAINER -->
+    <div id="app-container" class="min-h-screen bg-brand-50 hidden">
+        
+        <!-- HEADER -->
+        <header class="glass-header text-white shadow-xl sticky top-0 z-40">
+            <!-- Fix: Added 'relative z-10' to ensure content sits above the pseudo-element background -->
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+                <div class="flex justify-between items-center h-20">
+                    <div class="flex items-center space-x-3 cursor-pointer" onclick="showView('dashboard-view')">
+                        <div class="bg-white/20 backdrop-blur-sm p-2 rounded-xl ring-1 ring-white/30">
+                            <!-- New Financial Icon: Growth Bars (Header) -->
+                            <svg class="h-6 w-6 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M18.375 2.25c-1.035 0-1.875.84-1.875 1.875v15.75c0 1.035.84 1.875 1.875 1.875h.75c1.035 0 1.875-.84 1.875-1.875V4.125c0-1.035-.84-1.875-1.875-1.875h-.75ZM9.75 8.625c0-1.035.84-1.875 1.875-1.875h.75c1.035 0 1.875.84 1.875 1.875v11.25c0 1.035-.84 1.875-1.875 1.875h-.75a1.875 1.875 0 0 1-1.875-1.875V8.625ZM3 13.125c0-1.035.84-1.875 1.875-1.875h.75c1.035 0 1.875.84 1.875 1.875v6.75c0 1.035-.84 1.875-1.875 1.875h-.75A1.875 1.875 0 0 1 3 19.875v-6.75Z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <h1 class="text-xl font-bold tracking-tight">Iris</h1>
+                            <p class="text-xs text-brand-100 font-medium">Asset Manager</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center space-x-2 sm:space-x-4">
+                        <button id="add-investment-btn" class="hidden sm:flex bg-white text-brand-800 hover:bg-brand-50 font-bold py-2 px-4 rounded-lg shadow-md transition-all items-center space-x-2 border border-brand-100 group">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-5 h-5 transition-transform duration-500 ease-in-out group-hover:rotate-90">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                            </svg>
+                            <span>Add Asset</span>
+                        </button>
+
+                        <!-- Mobile Add Button (Icon only) -->
+                         <button id="add-investment-btn-mobile" class="sm:hidden bg-white text-brand-800 p-2 rounded-lg shadow-md group" onclick="document.getElementById('add-investment-btn').click()">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-5 h-5 transition-transform duration-500 ease-in-out group-hover:rotate-90">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                            </svg>
+                        </button>
+
+                        <div class="h-8 w-px bg-brand-400/30 mx-2"></div>
+
+                        <button id="liquid-assets-header-btn" title="Liquid Assets" class="p-2 rounded-lg hover:bg-white/10 transition-colors text-brand-50 group">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 transition-transform duration-500 ease-in-out group-hover:-translate-y-1">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a2.25 2.25 0 0 0-2.25-2.25H15a3 3 0 1 1-6 0H5.25A2.25 2.25 0 0 0 3 12m18 0v6a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 18v-6m18 0A2.25 2.25 0 0 0 18.75 9.75H5.25A2.25 2.25 0 0 0 3 12m18 0v-6A2.25 2.25 0 0 0 18.75 3.75H5.25A2.25 2.25 0 0 0 3 6v6" />
+                            </svg>
+                        </button>
+                        <button id="transactions-btn" title="All Transactions" class="p-2 rounded-lg hover:bg-white/10 transition-colors text-brand-50 group">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 transition-transform duration-500 ease-in-out group-hover:scale-110">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0ZM3.75 12h.007v.008H3.75V12Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm-.375 5.25h.007v.008H3.75v-.008Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
+                            </svg>
+                        </button>
+                        
+                        <div class="relative group">
+                            <button id="settings-btn" title="Settings" class="p-2 rounded-lg hover:bg-white/10 transition-colors text-brand-50">
+                                <!-- Improved Settings Icon with Hover Spin -->
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6 transition-transform duration-500 ease-in-out group-hover:rotate-90">
+                                    <path fill-rule="evenodd" d="M11.078 2.25c-.917 0-1.699.663-1.85 1.567L9.05 4.889c-.02.12-.115.26-.297.348a7.493 7.493 0 00-.986.57c-.166.115-.334.126-.45.083L6.3 5.508a1.875 1.875 0 00-2.282.819l-.922 1.597a1.875 1.875 0 00.432 2.385l.84.692c.095.078.17.229.154.43a7.598 7.598 0 000 1.139c.015.2-.059.352-.153.43l-.841.692a1.875 1.875 0 00-.432 2.385l.922 1.597a1.875 1.875 0 002.282.818l1.019-.382c.115-.043.283-.031.45.082.312.214.641.405.985.57.182.088.277.228.297.35l.178 1.071c.151.904.933 1.567 1.85 1.567h1.844c.916 0 1.699-.663 1.85-1.567l.178-1.072c.02-.12.114-.26.297-.349.344-.165.673-.356.985-.57.167-.114.335-.125.45-.082l1.02.382a1.875 1.875 0 002.28-.819l.923-1.597a1.875 1.875 0 00-.432-2.385l-.84-.692c-.095-.078-.17-.229-.154-.43a7.614 7.614 0 000-1.139c-.016-.2.059-.352.153-.43l.84-.692c.708-.582.891-1.59.433-2.385l-.922-1.597a1.875 1.875 0 00-2.282-.818l-1.02.382c-.114.043-.282.031-.449-.083a7.49 7.49 0 00-.985-.57c-.183-.087-.277-.227-.297-.348l-.179-1.072a1.875 1.875 0 00-1.85-1.567h-1.843zM12 15.75a3.75 3.75 0 100-7.5 3.75 3.75 0 000 7.5z" clip-rule="evenodd" />
+                                </svg>
+                            </button>
+                        </div>
+                        
+                        <!-- Data Menu Group -->
+                         <div class="flex items-center bg-brand-900/40 rounded-lg p-1 space-x-1">
+                             <button id="export-btn" title="Export Data" class="p-1.5 rounded hover:bg-white/20 transition-colors text-brand-100 group">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 transition-transform duration-500 ease-in-out group-hover:-translate-y-1">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" />
+                                </svg>
+                            </button>
+                            <button id="import-btn" title="Import Data" class="p-1.5 rounded hover:bg-white/20 transition-colors text-brand-100 group">
+                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 transition-transform duration-500 ease-in-out group-hover:translate-y-1">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M13.5 12l-1.5 1.5m0 0l-1.5-1.5m1.5 1.5V3" />
+                                </svg>
+                            </button>
+                         </div>
+                        
+                        <button id="logout-btn" title="Logout" class="p-2 rounded-lg hover:bg-brand-900 transition-colors text-brand-200 group">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 transition-transform duration-500 ease-in-out group-hover:translate-x-1">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m-3-1.5-3-3m0 0 3-3m-3 3H21" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+             <!-- Bottom accent line -->
+            <div class="h-1 bg-gradient-to-r from-violet-400 via-fuchsia-500 to-purple-500"></div>
+        </header>
+        
+        <input type="file" id="import-file-input" class="hidden" accept=".json">
+
+        <main class="container mx-auto p-4 sm:p-6 lg:p-8">
+            
+            <div id="loading-spinner" class="flex flex-col justify-center items-center h-64">
+                <div class="relative w-20 h-20">
+                    <div class="absolute top-0 left-0 w-full h-full border-4 border-brand-200 rounded-full animate-pulse"></div>
+                    <div class="absolute top-0 left-0 w-full h-full border-t-4 border-brand-600 rounded-full animate-spin"></div>
+                </div>
+                <span class="mt-4 text-lg font-medium text-brand-800">Syncing Iris...</span>
+            </div>
+
+            <!-- DASHBOARD -->
+            <div id="dashboard-view" class="app-view">
+                <h2 class="text-3xl font-extrabold text-brand-900 mb-6 flex items-center">
+                    <span class="mr-2">Overview</span>
+                    <span class="h-1 flex-grow bg-brand-100 rounded-full ml-4"></span>
+                </h2>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <!-- Total Investment -->
+                    <div class="bg-white p-5 rounded-2xl shadow-lg border-l-4 border-brand-500 flex items-center justify-between group hover:shadow-xl transition-shadow">
+                        <div>
+                            <h3 class="text-sm font-semibold text-brand-800/60 uppercase tracking-wide">Total Investment</h3>
+                            <p class="mt-1 text-3xl font-bold text-gray-900" id="summary-total-investment">₹0.00</p>
+                        </div>
+                        <span class="bg-brand-50 text-brand-600 p-3 rounded-xl shadow-sm group-hover:bg-brand-600 group-hover:text-white transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.82-2.64-2.05-2.64-3.565 0-1.513 1.255-2.73 2.772-2.73 1.282 0 2.45.83 2.875 2.04M12 6v12m-3-2.818" />
+                            </svg>
+                        </span>
+                    </div>
+
+                    <!-- Total Realized P/L -->
+                    <div class="bg-white p-5 rounded-2xl shadow-lg border-l-4 border-emerald-500 flex items-center justify-between group hover:shadow-xl transition-shadow">
+                        <div>
+                            <h3 class="text-sm font-semibold text-emerald-800/60 uppercase tracking-wide">Realized P/L</h3>
+                            <p class="mt-1 text-3xl font-bold text-gray-900" id="summary-total-pl">₹0.00</p>
+                        </div>
+                        <span class="bg-emerald-50 text-emerald-600 p-3 rounded-xl shadow-sm group-hover:bg-emerald-600 group-hover:text-white transition-colors">
+                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 18 9-9 4.5 4.5L21.75 6" />
+                            </svg>
+                        </span>
+                    </div>
+
+                    <!-- Total Assets -->
+                    <div class="bg-white p-5 rounded-2xl shadow-lg border-l-4 border-orange-400 flex items-center justify-between group hover:shadow-xl transition-shadow">
+                        <div>
+                            <h3 class="text-sm font-semibold text-orange-800/60 uppercase tracking-wide">Active Assets</h3>
+                            <p class="mt-1 text-3xl font-bold text-gray-900" id="summary-investments-count">0</p>
+                        </div>
+                        <span class="bg-orange-50 text-orange-600 p-3 rounded-xl shadow-sm group-hover:bg-orange-500 group-hover:text-white transition-colors">
+                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18 9 11.25l4.306 4.306a11.95 11.95 0 0 1 5.814-5.518l2.74-1.22m0 0-5.94-2.281m5.94 2.28-2.28 5.941" />
+                            </svg>
+                        </span>
+                    </div>
+
+                    <!-- Broker Fee -->
+                    <div class="bg-white p-5 rounded-2xl shadow-lg border-l-4 border-gray-400 flex items-center justify-between group hover:shadow-xl transition-shadow">
+                        <div>
+                            <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide">Total Fees Paid</h3>
+                            <p class="mt-1 text-3xl font-bold text-gray-900" id="summary-broker-fee">₹0.00</p>
+                        </div>
+                        <span class="bg-gray-100 text-gray-600 p-3 rounded-xl shadow-sm group-hover:bg-gray-600 group-hover:text-white transition-colors">
+                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 5.25h.008v.008H12v-.008Z" />
+                            </svg>
+                        </span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-5 gap-8">
+                    
+                    <div class="lg:col-span-2 space-y-6">
+                        <!-- Chart Card -->
+                        <div class="blurred-card p-6 rounded-2xl shadow-lg">
+                            <h3 class="text-lg font-bold text-brand-900 mb-4 flex items-center">
+                                <span class="w-2 h-6 bg-brand-600 rounded mr-2"></span>
+                                Portfolio Allocation
+                            </h3>
+                            <div class="relative h-[400px] w-full mx-auto">
+                                <canvas id="allocation-chart"></canvas>
+                            </div>
+                            <div id="category-legend" class="mt-6 flex flex-wrap justify-center gap-x-4 gap-y-2">
+                            </div>
+                            <div id="allocation-placeholder" class="text-center text-gray-400 py-20 hidden">
+                                <div class="bg-gray-100 inline-block p-4 rounded-full mb-2">
+                                     <svg class="w-8 h-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+                                </div>
+                                <p>Add your first asset to see distribution.</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Liquid Assets Mini Table -->
+                        <div class="blurred-card p-6 rounded-2xl shadow-lg border-t-4 border-t-brand-400">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="text-lg font-bold text-brand-900">Liquid Assets</h3>
+                                <button id="view-liquid-assets-btn" class="text-xs bg-brand-100 text-brand-700 px-3 py-1 rounded-full hover:bg-brand-200 transition-colors font-semibold">View Detail</button>
+                            </div>
+                            <div class="table-container max-h-48 rounded-xl border border-gray-100">
+                                <table class="min-w-full divide-y divide-gray-100">
+                                    <thead class="bg-gray-50">
+                                        <tr>
+                                            <th class="px-3 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Bank</th>
+                                            <th class="px-3 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Savings</th>
+                                            <th class="px-3 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">FD</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="bg-white divide-y divide-gray-50" id="liquid-summary-table-body">
+                                    </tbody>
+                                </table>
+                            </div>
+                            <p class="p-6 text-center text-gray-400 italic text-sm hidden" id="liquid-summary-placeholder">No liquid funds available.</p>
+                        </div>
+                    </div>
+
+                    <div class="lg:col-span-3 space-y-6">
+                        <div id="category-cards-container" class="space-y-6">
+                            <!-- Category cards injected here -->
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-10">
+                    <h2 class="text-2xl font-bold text-brand-900 mb-4 border-l-4 border-brand-600 pl-4">Year-Wise Performance</h2>
+                    <div class="blurred-card rounded-2xl shadow-lg overflow-hidden border border-gray-200">
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-100">
+                                <thead class="bg-brand-50/50">
+                                    <tr>
+                                        <th class="px-6 py-4 text-left text-xs font-bold text-brand-800 uppercase tracking-wider">Financial Year</th>
+                                        <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Invested</th>
+                                        <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Sold Value</th>
+                                        <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Gross P/L</th>
+                                        <th class="px-6 py-4 text-left text-xs font-bold text-red-400 uppercase tracking-wider">Tax</th>
+                                        <th class="px-6 py-4 text-left text-xs font-bold text-red-400 uppercase tracking-wider">Brokerage</th>
+                                        <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Net P/L</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-50" id="fy-summary-table-body">
+                                    <tr>
+                                        <td colspan="7" class="p-8 text-center text-gray-400">No transactions recorded yet.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- CATEGORY VIEW -->
+            <div id="category-view" class="app-view">
+                <div class="flex justify-between items-center mb-6 bg-white p-4 rounded-xl shadow-sm border border-brand-100">
+                    <h2 class="text-2xl font-bold text-brand-900 flex items-center">
+                        <span class="w-3 h-3 bg-brand-500 rounded-full mr-3"></span>
+                        <span id="category-view-title">Category</span>
+                    </h2>
+                    <button id="back-to-dashboard-btn" class="bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 font-medium py-2 px-4 rounded-lg shadow-sm transition-all text-sm flex items-center">
+                         <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                         Back
+                    </button>
+                </div>
+                <div id="category-tx-controls" class="mb-6 p-6 bg-white rounded-2xl shadow-md border border-gray-100">
+                </div>
+                <div class="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-200">
+                    <div class="table-container overflow-x-auto" id="category-view-list-container">
+                    </div>
+                </div>
+            </div>
+
+            <!-- CATEGORY DETAIL VIEW -->
+            <div id="category-detail-view" class="app-view">
+                <div class="flex justify-between items-center mb-6 bg-white p-4 rounded-xl shadow-sm border border-brand-100">
+                    <h2 class="text-2xl font-bold text-brand-900" id="category-detail-view-title">Category Assets</h2>
+                    <button id="back-to-dashboard-from-category-detail-btn" class="bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 font-medium py-2 px-4 rounded-lg shadow-sm transition-all text-sm flex items-center">
+                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                        Back
+                    </button>
+                </div>
+                <div class="bg-white rounded-2xl shadow-lg overflow-hidden p-6 border border-gray-200">
+                    <div id="category-detail-list-container" class="space-y-4 table-container">
+                    </div>
+                    <p class="p-8 text-center text-gray-400 italic hidden" id="category-detail-placeholder">No assets found for this category.</p>
+                </div>
+            </div>
+
+            <!-- TRANSACTIONS VIEW -->
+            <div id="transactions-view" class="app-view">
+                <div class="flex justify-between items-center mb-6 bg-white p-4 rounded-xl shadow-sm border border-brand-100">
+                    <h2 class="text-2xl font-bold text-brand-900">All Transactions</h2>
+                    <button id="back-to-dashboard-from-tx-btn" class="bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 font-medium py-2 px-4 rounded-lg shadow-sm transition-all text-sm flex items-center">
+                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                        Back
+                    </button>
+                </div>
+                <div id="all-tx-controls" class="mb-6 p-6 bg-white rounded-2xl shadow-md border border-gray-100">
+                </div>
+                <div class="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-200">
+                    <div class="table-container overflow-x-auto" id="all-tx-list-container">
+                    </div>
+                </div>
+            </div>
+
+            <!-- LIQUID ASSETS VIEW -->
+            <div id="liquid-assets-view" class="app-view">
+                <div class="flex justify-between items-center mb-6 bg-white p-4 rounded-xl shadow-sm border border-brand-100">
+                    <h2 class="text-2xl font-bold text-brand-900">Liquid Assets Manager</h2>
+                    <button id="back-to-dashboard-from-liquid-btn" class="bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 font-medium py-2 px-4 rounded-lg shadow-sm transition-all text-sm flex items-center">
+                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                        Back
+                    </button>
+                </div>
+
+                <div class="mb-10">
+                    <div class="flex justify-between items-center mb-4 px-2">
+                        <h3 class="text-xl font-bold text-gray-700 flex items-center">
+                            <span class="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
+                            Cash Accounts
+                        </h3>
+                        <button id="add-cash-btn" class="bg-emerald-50 text-emerald-700 hover:bg-emerald-100 font-semibold py-2 px-4 rounded-lg shadow-sm transition-all flex items-center space-x-2 text-sm border border-emerald-200">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                            </svg>
+                            <span>Add Cash</span>
+                        </button>
+                    </div>
+                    <div class="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-200">
+                        <div class="table-container overflow-x-auto" id="liquid-cash-table-container">
+                             <table class="min-w-full divide-y divide-gray-100">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase">Name</th>
+                                        <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase">Bank</th>
+                                        <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase">Amount</th>
+                                        <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase">Note</th>
+                                        <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-50" id="liquid-cash-table-body">
+                                </tbody>
+                            </table>
+                            <p class="p-8 text-center text-gray-400 italic hidden" id="liquid-cash-placeholder">No cash entries added yet.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="flex justify-between items-center mb-4 px-2">
+                        <h3 class="text-xl font-bold text-gray-700 flex items-center">
+                            <span class="w-2 h-2 bg-blue-500 rounded-full mr-2"></span>
+                            Fixed Deposits
+                        </h3>
+                        <button id="add-fd-btn" class="bg-blue-50 text-blue-700 hover:bg-blue-100 font-semibold py-2 px-4 rounded-lg shadow-sm transition-all flex items-center space-x-2 text-sm border border-blue-200">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                            </svg>
+                            <span>Add FD</span>
+                        </button>
+                    </div>
+                    <div class="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-200">
+                        <div class="table-container overflow-x-auto" id="liquid-fd-table-container">
+                            <table class="min-w-full divide-y divide-gray-100">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase">Bank</th>
+                                        <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase">Holder</th>
+                                        <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase">Start</th>
+                                        <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase">End</th>
+                                        <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase">Renewed</th>
+                                        <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase">Int. %</th>
+                                        <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase">Start Amt</th>
+                                        <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase">Mat. Amt</th>
+                                        <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-50" id="liquid-fd-table-body">
+                                </tbody>
+                            </table>
+                            <p class="p-8 text-center text-gray-400 italic hidden" id="liquid-fd-placeholder">No FD entries added yet.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SETTINGS VIEW -->
+            <div id="settings-view" class="app-view">
+                <div class="flex justify-between items-center mb-6 bg-white p-4 rounded-xl shadow-sm border border-brand-100">
+                    <h2 class="text-2xl font-bold text-brand-900">System Settings</h2>
+                    <button id="back-to-dashboard-from-settings-btn" class="bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 font-medium py-2 px-4 rounded-lg shadow-sm transition-all text-sm flex items-center">
+                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                        Back
+                    </button>
+                </div>
+                
+                <form id="settings-form" class="bg-white p-8 rounded-2xl shadow-lg border border-gray-100 space-y-10">
+                    <!-- Tax Settings -->
+                    <div>
+                        <h3 class="text-xl font-bold text-gray-800 mb-6 border-b border-gray-100 pb-2">Tax Configurations</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+                            <h4 class="text-md font-bold text-brand-700 md:col-span-3 flex items-center"><span class="mr-2">🇮🇳</span> India Tax Rules</h4>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 uppercase mb-1">STCG Period (Days)</label>
+                                <input type="number" id="settings-india-shortTermDays" class="block w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-brand-500 focus:border-brand-500 transition-all">
+                                <p class="mt-1 text-xs text-gray-400">Holding <= this is Short Term.</p>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Short Term Tax %</label>
+                                <input type="number" id="settings-india-shortTermTax" class="block w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-brand-500 focus:border-brand-500 transition-all">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Long Term Tax %</label>
+                                <input type="number" id="settings-india-longTermTax" class="block w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-brand-500 focus:border-brand-500 transition-all">
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                            <h4 class="text-md font-bold text-blue-700 md:col-span-3 flex items-center"><span class="mr-2">🇺🇸</span> US Tax Rules</h4>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 uppercase mb-1">STCG Period (Days)</label>
+                                <input type="number" id="settings-us-shortTermDays" class="block w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-brand-500 focus:border-brand-500 transition-all">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Short Term Tax %</label>
+                                <input type="number" id="settings-us-shortTermTax" class="block w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-brand-500 focus:border-brand-500 transition-all">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Long Term Tax %</label>
+                                <input type="number" id="settings-us-longTermTax" class="block w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-brand-500 focus:border-brand-500 transition-all">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
+                        <div>
+                            <h3 class="text-xl font-bold text-gray-800 mb-4 border-b border-gray-100 pb-2">Asset Types</h3>
+                            <label class="block text-sm font-medium text-gray-600 mb-2">Categories (one per line)</label>
+                            <textarea id="settings-categories" rows="6" class="block w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 transition-all shadow-inner"></textarea>
+                            <p class="mt-2 text-xs text-gray-400">Updates fees section on save.</p>
+                        </div>
+                        
+                        <div>
+                            <h3 class="text-xl font-bold text-gray-800 mb-4 border-b border-gray-100 pb-2">Global Fees</h3>
+                             <div class="mb-6">
+                                <label class="block text-sm font-medium text-gray-600 mb-2">Sell Brokerage (% on Profit)</label>
+                                <input type="number" step="any" id="settings-brokerFeePercent" class="block w-full max-w-xs px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-brand-500 focus:border-brand-500 transition-all">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h3 class="text-xl font-bold text-gray-800 mb-4 border-b border-gray-100 pb-2">Buy Transaction Fees (Defaults)</h3>
+                        <div id="settings-category-fees" class="bg-gray-50 p-6 rounded-xl border border-gray-200 space-y-4">
+                            <!-- Dynamic fee inputs -->
+                        </div>
+                    </div>
+                    
+                    <div class="flex justify-end pt-6 border-t border-gray-100">
+                        <button type="submit" class="bg-brand-600 hover:bg-brand-700 text-white font-bold py-3 px-8 rounded-xl shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-0.5">
+                            Save Configuration
+                        </button>
+                    </div>
+                </form>
+            </div> 
+        </main>
+    </div>
+
+    <!-- MODALS -->
+    <!-- Transaction Modal -->
+    <div id="transaction-modal" class="fixed inset-0 bg-brand-900/60 backdrop-blur-sm flex justify-center items-center p-4 z-50 hidden transition-opacity">
+        <div class="bg-white rounded-2xl shadow-2xl border border-white/50 w-full max-w-lg transform transition-all scale-100">
+            <form id="transaction-form">
+                <div class="flex justify-between items-center p-5 border-b border-gray-100 bg-gray-50/50 rounded-t-2xl">
+                    <h2 class="text-xl font-bold text-gray-800" id="transaction-modal-title">New Transaction</h2>
+                    <button type="button" class="text-gray-400 hover:text-red-500 transition-colors text-2xl leading-none" onclick="closeModal('transaction-modal')">&times;</button>
+                </div>
+                
+                <div class="p-6 space-y-5 modal-body">
+                    <input type="hidden" id="form-asset-id">
+                    <input type="hidden" id="form-tx-id">
+                    <input type="hidden" id="form-mode"> 
+                    
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Transaction Type</label>
+                        <select id="form-tx-type" name="txType" class="block w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-brand-500 focus:border-brand-500 transition-all" required>
+                            <option value="Buy">Buy Asset</option>
+                            <option value="Sell">Sell Asset</option>
+                        </select>
+                    </div>
+
+                    <div id="asset-details-group" class="space-y-4 p-4 bg-gray-50 rounded-xl border border-gray-100">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Category</label>
+                            <select id="form-asset-type" name="assetType" class="block w-full px-4 py-2 bg-white border border-gray-200 rounded-lg focus:ring-brand-500 focus:border-brand-500 transition-all" required>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Market</label>
+                            <select id="form-country" name="country" class="block w-full px-4 py-2 bg-white border border-gray-200 rounded-lg focus:ring-brand-500 focus:border-brand-500 transition-all" required>
+                                <option>India</option>
+                                <option>US</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Asset Name</label>
+                            <input type="text" id="form-asset-name" name="assetName" class="block w-full px-4 py-2 bg-white border border-gray-200 rounded-lg focus:ring-brand-500 focus:border-brand-500 transition-all" required placeholder="e.g., Reliance Industries">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-5">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Date</label>
+                            <input type="date" id="form-date" name="date" class="block w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-brand-500 focus:border-brand-500 transition-all" required>
+                        </div>
+                         <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Quantity</label>
+                            <input type="number" id="form-quantity" name="quantity" step="any" min="0" class="block w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-brand-500 focus:border-brand-500 transition-all" required>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-5">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Price / Unit</label>
+                            <input type="number" id="form-price" name="price" step="any" min="0" class="block w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-brand-500 focus:border-brand-500 transition-all" required>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Fees / Costs</label>
+                            <input type="number" id="form-misc-costs" name="miscCosts" step="any" min="0" value="0" class="block w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-brand-500 focus:border-brand-500 transition-all" required>
+                            <p class="mt-1 text-[10px] text-brand-500 font-medium" id="form-fee-notice">Auto-adds default category fees on 'Buy'.</p>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Note</label>
+                        <input type="text" id="form-note" name="note" class="block w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-brand-500 focus:border-brand-500 transition-all" placeholder="Optional remarks">
+                    </div>
+                </div>
+                
+                <div class="flex justify-end p-5 border-t border-gray-100 bg-gray-50/50 rounded-b-2xl">
+                    <button type="button" class="bg-white py-2 px-5 border border-gray-300 rounded-xl shadow-sm text-sm font-semibold text-gray-700 hover:bg-gray-50 mr-3 transition-colors" onclick="closeModal('transaction-modal')">Cancel</button>
+                    <button type="submit" id="form-submit-btn" class="bg-brand-600 hover:bg-brand-700 text-white py-2 px-6 rounded-xl shadow-md text-sm font-bold transition-all transform hover:-translate-y-0.5">
+                        Submit
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Sell Confirm Modal -->
+    <div id="sell-confirm-modal" class="fixed inset-0 bg-brand-900/60 backdrop-blur-sm flex justify-center items-center p-4 z-[60] hidden">
+        <div class="bg-white rounded-2xl shadow-2xl border border-white/50 w-full max-w-lg">
+            <div class="flex justify-between items-center p-5 border-b border-gray-100 bg-gray-50/50 rounded-t-2xl">
+                <h2 class="text-xl font-bold text-gray-800">Confirm Sale</h2>
+                <button type="button" class="text-gray-400 hover:text-red-500 text-2xl leading-none" onclick="closeModal('sell-confirm-modal')">&times;</button>
+            </div>
+            <div class="p-6 space-y-4 modal-body">
+                <p class="text-lg text-gray-600 border-b pb-4">Review calculated metrics for this transaction.</p>
+                <div class="space-y-3 text-sm">
+                    <div class="flex justify-between"><span class="text-gray-500">Gross P/L:</span> <span class="font-bold text-gray-800" id="sell-profit"></span></div>
+                    <div class="flex justify-between"><span class="text-gray-500">Avg Holding:</span> <span class="font-bold text-gray-800" id="sell-holding"></span></div>
+                    <div class="flex justify-between"><span class="text-gray-500">Term:</span> <span class="inline-block px-2 py-0.5 rounded text-xs font-semibold bg-gray-100 text-gray-700" id="sell-term"></span></div>
+                </div>
+                <div class="border-t border-dashed border-gray-200 my-2"></div>
+                <div class="space-y-3 text-sm">
+                    <div class="flex justify-between"><span class="text-gray-500">Tax Rate:</span> <span class="font-medium text-gray-800" id="sell-tax-rate"></span></div>
+                    <div class="flex justify-between"><span class="text-gray-500">Tax Amt:</span> <span class="font-bold text-red-500" id="sell-tax-amount"></span></div>
+                    <div class="flex justify-between"><span class="text-gray-800 font-bold">Post-Tax Profit:</span> <span class="font-bold" id="sell-after-tax-profit"></span></div>
+                </div>
+                <div class="border-t border-dashed border-gray-200 my-2"></div>
+                 <div class="space-y-3 text-sm bg-brand-50 p-4 rounded-xl">
+                    <div class="flex justify-between"><span class="text-brand-800/70">Brokerage (<span id="sell-broker-rate"></span>%):</span> <span class="font-bold text-red-500" id="sell-broker-fee"></span></div>
+                    <div class="flex justify-between items-end"><span class="text-brand-900 text-lg font-bold">Net P/L:</span> <span class="text-xl font-extrabold" id="sell-net-profit"></span></div>
+                </div>
+            </div>
+            <div class="flex justify-end p-5 border-t border-gray-100 bg-gray-50/50 rounded-b-2xl">
+                <button type="button" class="bg-white py-2 px-5 border border-gray-300 rounded-xl shadow-sm text-sm font-semibold text-gray-700 hover:bg-gray-50 mr-3" onclick="closeModal('sell-confirm-modal')">Cancel</button>
+                <button type="button" id="confirm-sell-btn" class="bg-red-600 hover:bg-red-700 text-white py-2 px-6 rounded-xl shadow-md text-sm font-bold transition-all transform hover:-translate-y-0.5">
+                    Confirm Sale
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Asset Details Modal -->
+    <div id="details-modal" class="fixed inset-0 bg-brand-900/60 backdrop-blur-sm flex justify-center items-center p-4 z-50 hidden">
+        <div class="bg-white rounded-2xl shadow-2xl border border-white/50 w-full max-w-4xl max-h-[90vh] flex flex-col">
+            <div class="flex justify-between items-center p-5 border-b border-gray-100 bg-gray-50/50 rounded-t-2xl">
+                <h2 class="text-xl font-bold text-gray-800" id="details-title">Asset Details</h2>
+                <button type="button" class="text-gray-400 hover:text-red-500 text-2xl leading-none" onclick="closeModal('details-modal')">&times;</button>
+            </div>
+            <div class="p-6 space-y-8 modal-body flex-grow">
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                    <div class="bg-gray-50 p-4 rounded-xl border border-gray-100">
+                        <h4 class="text-xs font-bold text-gray-400 uppercase">Holdings</h4>
+                        <p class="text-xl font-bold text-brand-900" id="details-qty"></p>
+                    </div>
+                    <div class="bg-gray-50 p-4 rounded-xl border border-gray-100">
+                        <h4 class="text-xs font-bold text-gray-400 uppercase">Avg Buy</h4>
+                        <p class="text-xl font-bold text-brand-900" id="details-avg-buy"></p>
+                    </div>
+                    <div class="bg-gray-50 p-4 rounded-xl border border-gray-100">
+                        <h4 class="text-xs font-bold text-gray-400 uppercase">Total Cost</h4>
+                        <p class="text-xl font-bold text-brand-900" id="details-total-cost"></p>
+                    </div>
+                     <div class="bg-gray-50 p-4 rounded-xl border border-gray-100">
+                        <h4 class="text-xs font-bold text-gray-400 uppercase">Realized P/L</h4>
+                        <p class="text-xl font-bold text-brand-900" id="details-realized-pl"></p>
+                    </div>
+                </div>
+                
+                <div>
+                    <h3 class="text-lg font-bold text-gray-800 mb-4 pl-2 border-l-4 border-brand-400">Transaction History</h3>
+                    <div class="overflow-x-auto border border-gray-100 rounded-xl table-container shadow-inner">
+                        <table class="min-w-full divide-y divide-gray-100">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase">Date</th>
+                                    <th class="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase">Type</th>
+                                    <th class="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase">Qty</th>
+                                    <th class="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase">Price</th>
+                                    <th class="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase">Note</th>
+                                    <th class="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase">Net P/L</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-50" id="details-transactions-list">
+                                </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="flex justify-end p-5 border-t border-gray-100 bg-gray-50/50 rounded-b-2xl">
+                <button type="button" class="bg-gray-800 hover:bg-gray-900 text-white py-2 px-6 rounded-xl shadow-md text-sm font-bold transition-all" onclick="closeModal('details-modal')">Close</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Liquid Form Modal -->
+    <div id="liquid-form-modal" class="fixed inset-0 bg-brand-900/60 backdrop-blur-sm flex justify-center items-center p-4 z-50 hidden">
+        <div class="bg-white rounded-2xl shadow-2xl border border-white/50 w-full max-w-lg">
+            <form id="liquid-form">
+                <div class="flex justify-between items-center p-5 border-b border-gray-100 bg-gray-50/50 rounded-t-2xl">
+                    <h2 class="text-xl font-bold text-gray-800" id="liquid-modal-title">Add Entry</h2>
+                    <button type="button" class="text-gray-400 hover:text-red-500 text-2xl leading-none" onclick="closeModal('liquid-form-modal')">&times;</button>
+                </div>
+                
+                <div class="p-6 space-y-4 modal-body">
+                    <input type="hidden" id="form-liquid-mode"> <input type="hidden" id="form-liquid-edit-id">
+
+                    <div id="cash-fields-group" class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Name</label>
+                            <input type="text" id="form-cash-name" class="block w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-brand-500 focus:border-brand-500 transition-all" placeholder="e.g., Main Savings">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Bank</label>
+                            <input type="text" id="form-cash-bank" class="block w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-brand-500 focus:border-brand-500 transition-all" placeholder="e.g., HDFC">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Amount</label>
+                            <input type="number" step="any" id="form-cash-amount" class="block w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-brand-500 focus:border-brand-500 transition-all">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Note</label>
+                            <input type="text" id="form-cash-note" class="block w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-brand-500 focus:border-brand-500 transition-all">
+                        </div>
+                    </div>
+
+                    <div id="fd-fields-group" class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Bank Name</label>
+                            <input type="text" id="form-fd-bank" class="block w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-brand-500 focus:border-brand-500 transition-all">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Holder</label>
+                            <input type="text" id="form-fd-holder" class="block w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-brand-500 focus:border-brand-500 transition-all">
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Start Date</label>
+                                <input type="date" id="form-fd-startDate" class="block w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-brand-500 focus:border-brand-500 transition-all">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 uppercase mb-1">End Date</label>
+                                <input type="date" id="form-fd-endDate" class="block w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-brand-500 focus:border-brand-500 transition-all">
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Renewed Date</label>
+                                <input type="date" id="form-fd-renewedDate" class="block w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-brand-500 focus:border-brand-500 transition-all">
+                            </div>
+                             <div>
+                                <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Int. %</label>
+                                <input type="number" step="any" id="form-fd-interest" class="block w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-brand-500 focus:border-brand-500 transition-all">
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Start Amt</label>
+                                <input type="number" step="any" id="form-fd-startAmount" class="block w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-brand-500 focus:border-brand-500 transition-all">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Mat. Amt</label>
+                                <input type="number" step="any" id="form-fd-endAmount" class="block w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-brand-500 focus:border-brand-500 transition-all">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flex justify-end p-5 border-t border-gray-100 bg-gray-50/50 rounded-b-2xl">
+                    <button type="button" class="bg-white py-2 px-5 border border-gray-300 rounded-xl shadow-sm text-sm font-semibold text-gray-700 hover:bg-gray-50 mr-3" onclick="closeModal('liquid-form-modal')">Cancel</button>
+                    <button type="submit" id="form-liquid-submit-btn" class="bg-brand-600 hover:bg-brand-700 text-white py-2 px-6 rounded-xl shadow-md text-sm font-bold transition-all transform hover:-translate-y-0.5">
+                        Save
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Delete Confirm Modal -->
+    <div id="delete-confirm-modal" class="fixed inset-0 bg-brand-900/60 backdrop-blur-sm flex justify-center items-center p-4 z-[70] hidden">
+        <div class="bg-white rounded-2xl shadow-2xl border border-white/50 w-full max-w-sm text-center p-8">
+            <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                 <svg class="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+            </div>
+            <h2 class="text-xl font-bold text-gray-900 mb-2" id="delete-modal-title">Delete Item?</h2>
+            <p class="text-gray-500 mb-6 text-sm" id="delete-modal-text">This action is permanent and cannot be undone.</p>
+            <div class="flex justify-center space-x-3">
+                <button type="button" class="bg-white border border-gray-300 text-gray-700 font-semibold py-2 px-4 rounded-xl hover:bg-gray-50" onclick="closeModal('delete-confirm-modal')">Cancel</button>
+                <button type="button" id="confirm-delete-btn" class="bg-red-600 text-white font-semibold py-2 px-4 rounded-xl hover:bg-red-700 shadow-md">Yes, Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="message-box" class="fixed bottom-6 right-6 px-6 py-4 rounded-xl shadow-2xl z-[100] hidden transition-all duration-300 transform translate-y-10 opacity-0 flex items-center border border-white/20 backdrop-blur-md">
+        <span id="message-text" class="font-medium text-sm"></span>
+    </div>
+
+    <script>
+        // --- Global State ---
+        const ASSETS_KEY = 'assetManager_assets';
+        const TRANSACTIONS_KEY = 'assetManager_transactions';
+        const SETTINGS_KEY = 'assetManager_settings';
+        const LIQUID_CASH_KEY = 'assetManager_liquidCash';
+        const LIQUID_FD_KEY = 'assetManager_liquidFDs';
+        const AUTH_KEY = 'assetManager_isLoggedIn';
+
+        // Iris Color Palette for Charts (Purple Theme)
+        const CHART_COLORS = ['#9333ea', '#a855f7', '#c084fc', '#d8b4fe', '#e9d5ff', '#7e22ce', '#6b21a8', '#581c87', '#e5e7eb', '#9ca3af'];
+
+        let allAssets = [];
+        let allTransactions = [];
+        let allLiquidCash = [];
+        let allLiquidFDs = [];
+        
+        let allocationChart;
+        let sellConfirmData = {}; 
+        let deleteTxId = null;
+        let deleteLiquidId = null;
+        
+        // --- Settings State ---
+        let globalSettings = {};
+        const defaultSettings = {
+            india: {
+                shortTermDays: 365,
+                shortTermTax: 20,
+                longTermTax: 15
+            },
+            us: {
+                shortTermDays: 730,
+                shortTermTax: 20,
+                longTermTax: 20
+            },
+            brokerFeePercent: 5,
+            categoryTypes: ["Equity", "Commodity", "Bonds", "Real Estate", "Mutual Funds"],
+            categoryFees: {
+                "Equity": { feePercent: 0, feeFlat: 0 },
+                "Commodity": { feePercent: 0, feeFlat: 0 },
+                "Bonds": { feePercent: 0, feeFlat: 0 },
+                "Real Estate": { feePercent: 0, feeFlat: 0 },
+                "Mutual Funds": { feePercent: 0, feeFlat: 0 }
+            }
+        };
+
+        // --- App Initialization ---
+        document.addEventListener('DOMContentLoaded', () => {
+            if (sessionStorage.getItem(AUTH_KEY) !== 'true') {
+                showView('login-view');
+                document.getElementById('app-container').classList.add('hidden');
+            } else {
+                initApp();
+                document.getElementById('login-view').classList.add('hidden');
+                document.getElementById('app-container').classList.remove('hidden');
+            }
+            
+            document.getElementById('login-form').addEventListener('submit', handleLogin);
+        });
+
+        function initApp() {
+            try {
+                Chart.register(ChartDataLabels);
+            } catch (e) {
+                console.warn("Chart plugin registration failed, likely due to loading order.", e);
+            }
+            
+            loadSettings();
+            setupEventListeners();
+            initCharts();
+            injectTransactionControls('all-tx-controls', 'all');
+            injectTransactionControls('category-tx-controls', 'category');
+            loadDataFromLocalStorage();
+            document.getElementById('loading-spinner').classList.add('hidden');
+            showView('dashboard-view');
+        }
+
+        function setupEventListeners() {
+            document.getElementById('add-investment-btn').addEventListener('click', () => { openTransactionModal('NEW_BUY'); });
+            document.getElementById('liquid-assets-header-btn').addEventListener('click', () => { showView('liquid-assets-view'); });
+            document.getElementById('transactions-btn').addEventListener('click', () => { renderTransactionsView(); showView('transactions-view'); });
+            document.getElementById('settings-btn').addEventListener('click', () => { loadSettingsIntoForm(); showView('settings-view'); });
+            
+            document.getElementById('logout-btn').addEventListener('click', handleLogout);
+            document.getElementById('export-btn').addEventListener('click', handleExportData);
+            document.getElementById('import-btn').addEventListener('click', handleImportData);
+            document.getElementById('import-file-input').addEventListener('change', (event) => {
+                const file = event.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        const text = e.target.result;
+                        const backupData = JSON.parse(text);
+                        loadAllDataFromObject(backupData);
+                    } catch (err) {
+                        showMessage("Failed to parse file.", "error");
+                        console.error(err);
+                    }
+                    event.target.value = null; 
+                };
+                reader.readAsText(file);
+            });
+
+            document.getElementById('back-to-dashboard-btn').addEventListener('click', () => showView('dashboard-view'));
+            document.getElementById('back-to-dashboard-from-tx-btn').addEventListener('click', () => showView('dashboard-view'));
+            document.getElementById('back-to-dashboard-from-settings-btn').addEventListener('click', () => showView('dashboard-view'));
+            document.getElementById('back-to-dashboard-from-liquid-btn').addEventListener('click', () => showView('dashboard-view'));
+            document.getElementById('view-liquid-assets-btn').addEventListener('click', () => showView('liquid-assets-view'));
+            document.getElementById('back-to-dashboard-from-category-detail-btn').addEventListener('click', () => showView('dashboard-view'));
+
+            document.getElementById('transaction-form').addEventListener('submit', handleTransactionSubmit);
+            document.getElementById('settings-form').addEventListener('submit', handleSaveSettings);
+            document.getElementById('liquid-form').addEventListener('submit', handleLiquidFormSubmit);
+
+            document.getElementById('add-cash-btn').addEventListener('click', () => openLiquidForm('CASH'));
+            document.getElementById('add-fd-btn').addEventListener('click', () => openLiquidForm('FD'));
+
+            document.getElementById('confirm-sell-btn').addEventListener('click', executeSell);
+            document.getElementById('confirm-delete-btn').addEventListener('click', executeDelete);
+            
+            document.getElementById('all-tx-controls').addEventListener('input', () => renderTransactionsView());
+            document.getElementById('category-tx-controls').addEventListener('input', () => {
+                const category = document.getElementById('category-view-title').textContent.replace(' Transactions', '');
+                renderTransactionsView(category);
+            });
+        }
+        
+        function injectTransactionControls(containerId, prefix) {
+            const container = document.getElementById(containerId);
+            let categoryFilter = `
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Category</label>
+                    <select id="${prefix}-tx-filter-category" class="block w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-brand-500 focus:border-brand-500 text-sm">
+                        <option value="">All</option>
+                        ${globalSettings.categoryTypes.map(c => `<option value="${c}">${c}</option>`).join('')}
+                    </select>
+                </div>
+            `;
+            
+            if(prefix === 'category') categoryFilter = '';
+            
+            container.innerHTML = `
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Search</label>
+                        <input type="text" id="${prefix}-tx-search" class="block w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-brand-500 focus:border-brand-500 text-sm" placeholder="Name, date, note...">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Type</label>
+                        <select id="${prefix}-tx-filter-type" class="block w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-brand-500 focus:border-brand-500 text-sm">
+                            <option value="">All</option>
+                            <option value="Buy">Buy</option>
+                            <option value="Sell">Sell</option>
+                        </select>
+                    </div>
+                    ${categoryFilter}
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Sort By</label>
+                        <select id="${prefix}-tx-sort" class="block w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-brand-500 focus:border-brand-500 text-sm">
+                            <option value="newest">Date (Newest)</option>
+                            <option value="oldest">Date (Oldest)</option>
+                            <option value="value_desc">Value (High-Low)</option>
+                            <option value="value_asc">Value (Low-High)</option>
+                        </select>
+                    </div>
+                </div>
+            `;
+        }
+
+        function showView(viewId) {
+            document.querySelectorAll('.app-view, #login-view').forEach(view => {
+                view.style.display = 'none';
+            });
+            const targetView = document.getElementById(viewId);
+            if(targetView) {
+                targetView.style.display = (viewId === 'login-view') ? 'flex' : 'block';
+            }
+            if (viewId === 'dashboard-view') renderDashboard();
+            else if (viewId === 'liquid-assets-view') renderLiquidAssetsView();
+        }
+
+        function loadDataFromLocalStorage() {
+            allAssets = JSON.parse(localStorage.getItem(ASSETS_KEY)) || [];
+            allTransactions = JSON.parse(localStorage.getItem(TRANSACTIONS_KEY)) || [];
+            allLiquidCash = JSON.parse(localStorage.getItem(LIQUID_CASH_KEY)) || [];
+            allLiquidFDs = JSON.parse(localStorage.getItem(LIQUID_FD_KEY)) || [];
+            renderDashboard(); 
+        }
+
+        function saveDataToLocalStorage() {
+            try {
+                localStorage.setItem(ASSETS_KEY, JSON.stringify(allAssets));
+                localStorage.setItem(TRANSACTIONS_KEY, JSON.stringify(allTransactions));
+                localStorage.setItem(LIQUID_CASH_KEY, JSON.stringify(allLiquidCash));
+                localStorage.setItem(LIQUID_FD_KEY, JSON.stringify(allLiquidFDs));
+            } catch (error) { 
+                showMessage("Storage full.", "error");
+            }
+        }
+        
+        function loadSettings() {
+            let saved = JSON.parse(localStorage.getItem(SETTINGS_KEY));
+            globalSettings = { ...defaultSettings, ...(saved || {}) };
+            // Deep merge essential objects
+            globalSettings.india = { ...defaultSettings.india, ...(saved?.india || {}) };
+            globalSettings.us = { ...defaultSettings.us, ...(saved?.us || {}) };
+            globalSettings.categoryFees = { ...defaultSettings.categoryFees, ...(saved?.categoryFees || {}) };
+            
+            const feesContainer = document.getElementById('settings-category-fees');
+            feesContainer.innerHTML = '';
+            globalSettings.categoryTypes.forEach(type => {
+                const key = type;
+                feesContainer.innerHTML += `
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center py-2 border-b border-gray-100 last:border-0">
+                        <label class="text-sm font-bold text-gray-700">${type}</label>
+                        <div>
+                            <input type="number" placeholder="% Fee" step="any" id="settings-fee-${key}-percent" data-key="${key}" data-type="feePercent" class="block w-full px-3 py-1 bg-white border border-gray-200 rounded text-sm">
+                        </div>
+                        <div>
+                            <input type="number" placeholder="Flat Fee" step="any" id="settings-fee-${key}-flat" data-key="${key}" data-type="feeFlat" class="block w-full px-3 py-1 bg-white border border-gray-200 rounded text-sm">
+                        </div>
+                    </div>
+                `;
+            });
+        }
+        
+        function loadSettingsIntoForm() {
+            document.getElementById('settings-india-shortTermDays').value = globalSettings.india.shortTermDays;
+            document.getElementById('settings-india-shortTermTax').value = globalSettings.india.shortTermTax;
+            document.getElementById('settings-india-longTermTax').value = globalSettings.india.longTermTax;
+            document.getElementById('settings-us-shortTermDays').value = globalSettings.us.shortTermDays;
+            document.getElementById('settings-us-shortTermTax').value = globalSettings.us.shortTermTax;
+            document.getElementById('settings-us-longTermTax').value = globalSettings.us.longTermTax;
+            document.getElementById('settings-categories').value = globalSettings.categoryTypes.join('\n');
+            document.getElementById('settings-brokerFeePercent').value = globalSettings.brokerFeePercent;
+
+            globalSettings.categoryTypes.forEach(key => {
+                if (document.getElementById(`settings-fee-${key}-percent`)) {
+                    document.getElementById(`settings-fee-${key}-percent`).value = globalSettings.categoryFees[key]?.feePercent || 0;
+                }
+                if (document.getElementById(`settings-fee-${key}-flat`)) {
+                    document.getElementById(`settings-fee-${key}-flat`).value = globalSettings.categoryFees[key]?.feeFlat || 0;
+                }
+            });
+        }
+        
+        function handleSaveSettings(e) {
+            e.preventDefault();
+            
+            const categoriesText = document.getElementById('settings-categories').value;
+            const newTypes = categoriesText.split('\n').map(c => c.trim()).filter(c => c.length > 0);
+            globalSettings.categoryTypes = newTypes;
+
+            globalSettings.india.shortTermDays = parseInt(document.getElementById('settings-india-shortTermDays').value) || 365;
+            globalSettings.india.shortTermTax = parseFloat(document.getElementById('settings-india-shortTermTax').value) || 20;
+            globalSettings.india.longTermTax = parseFloat(document.getElementById('settings-india-longTermTax').value) || 15;
+            globalSettings.us.shortTermDays = parseInt(document.getElementById('settings-us-shortTermDays').value) || 730;
+            globalSettings.us.shortTermTax = parseFloat(document.getElementById('settings-us-shortTermTax').value) || 20;
+            globalSettings.us.longTermTax = parseFloat(document.getElementById('settings-us-longTermTax').value) || 20;
+            globalSettings.brokerFeePercent = parseFloat(document.getElementById('settings-brokerFeePercent').value) || 5;
+            
+            const newCategoryFees = {};
+            document.getElementById('settings-category-fees').querySelectorAll('input').forEach(input => {
+                const key = input.dataset.key;
+                const type = input.dataset.type;
+                if(key && type && globalSettings.categoryTypes.includes(key)) {
+                    if (!newCategoryFees[key]) newCategoryFees[key] = { feePercent: 0, feeFlat: 0 };
+                    newCategoryFees[key][type] = parseFloat(input.value) || 0;
+                }
+            });
+
+            for (const type of newTypes) {
+                if (!newCategoryFees[type]) newCategoryFees[type] = { feePercent: 0, feeFlat: 0 };
+            }
+            globalSettings.categoryFees = newCategoryFees;
+            localStorage.setItem(SETTINGS_KEY, JSON.stringify(globalSettings));
+            loadSettings(); loadSettingsIntoForm(); injectTransactionControls('all-tx-controls', 'all');
+            showMessage("Settings updated.", "success");
+        }
+
+        // --- Dashboard & Rendering ---
+        function renderDashboard() {
+            const listContainer = document.getElementById('category-cards-container');
+            listContainer.innerHTML = ''; 
+            document.getElementById('allocation-placeholder').classList.add('hidden');
+
+            globalSettings.categoryTypes.forEach(type => {
+                const key = type.replace(" ", "_");
+                const card = document.createElement('div');
+                card.className = "blurred-card rounded-2xl shadow-lg overflow-hidden border border-gray-100";
+                card.innerHTML = `
+                    <div class="flex justify-between items-center p-4 border-b border-gray-100 bg-gray-50/50">
+                        <h3 class="text-md font-bold text-gray-800">${type}</h3>
+                        <button class="btn-view-more text-xs font-semibold text-brand-600 hover:text-brand-800 hover:underline" data-category-type="${type}" style="display: none;">View All &rarr;</button>
+                    </div>
+                    <div class="p-4 space-y-3" id="${key.toLowerCase()}-list-container">
+                        <p class="text-gray-400 text-center py-4 text-sm italic">No investments.</p>
+                    </div>
+                `;
+                listContainer.appendChild(card);
+            });
+            
+            const fySummaryBody = document.getElementById('fy-summary-table-body');
+            fySummaryBody.innerHTML = ''; 
+            
+            let totalInvestment = 0; 
+            let totalRealizedPL = 0;
+            let totalBrokerFee = 0;
+            const fySummary = {};
+
+            if (allAssets.length === 0 && allTransactions.length === 0 && allLiquidCash.length === 0 && allLiquidFDs.length === 0) {
+                updateChartsData(); 
+                updateSummaryCards(0, 0, 0, 0); 
+                renderLiquidSummary(); 
+                document.getElementById('allocation-placeholder').classList.remove('hidden');
+                fySummaryBody.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-gray-400">No data available.</td></tr>`;
+                return;
+            }
+            
+            allTransactions.forEach(tx => {
+                const fy = tx.financialYear;
+                if (!fy) return; 
+                if (!fySummary[fy]) fySummary[fy] = { invested: 0, sold: 0, profit: 0, tax: 0, brokerFee: 0, netProfit: 0 };
+                
+                if (tx.type === 'Buy') {
+                    fySummary[fy].invested += (tx.quantity * tx.price) + tx.miscCosts;
+                } else if (tx.type === 'Sell') {
+                    fySummary[fy].sold += (tx.quantity * tx.price);
+                    fySummary[fy].profit += tx.profit || 0; 
+                    fySummary[fy].tax += tx.taxAmount || 0;
+                    fySummary[fy].brokerFee += tx.brokerFee || 0;
+                    fySummary[fy].netProfit += tx.netProfit || 0;
+                }
+            });
+            
+            const sortedFYs = Object.keys(fySummary).sort().reverse();
+            if (sortedFYs.length > 0) {
+                sortedFYs.forEach(fy => {
+                    const data = fySummary[fy];
+                    const netPLColor = data.netProfit >= 0 ? 'text-emerald-600' : 'text-red-600';
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td class="px-6 py-3 whitespace-nowrap text-sm font-bold text-brand-900">${fy}</td>
+                        <td class="px-6 py-3 whitespace-nowrap text-sm text-gray-600">${formatCurrency(data.invested)}</td>
+                        <td class="px-6 py-3 whitespace-nowrap text-sm text-gray-600">${formatCurrency(data.sold)}</td>
+                        <td class="px-6 py-3 whitespace-nowrap text-sm text-gray-600">${formatCurrency(data.profit)}</td>
+                        <td class="px-6 py-3 whitespace-nowrap text-sm text-red-400 font-medium">${formatCurrency(data.tax)}</td>
+                        <td class="px-6 py-3 whitespace-nowrap text-sm text-red-400 font-medium">${formatCurrency(data.brokerFee)}</td>
+                        <td class="px-6 py-3 whitespace-nowrap text-sm font-bold ${netPLColor}">${formatCurrency(data.netProfit)}</td>
+                    `;
+                    fySummaryBody.appendChild(row);
+                });
+            } else {
+                 fySummaryBody.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-gray-400">No transactions.</td></tr>`;
+            }
+
+            const groupedAssets = allAssets.reduce((acc, asset) => {
+                if(asset.totalQuantity > 0.00001) (acc[asset.assetType] = acc[asset.assetType] || []).push(asset);
+                return acc;
+            }, {});
+
+            let activeAssetCount = 0;
+            for (const type of globalSettings.categoryTypes) {
+                const assets = groupedAssets[type] || [];
+                const key = type.replace(" ", "_");
+                const container = document.getElementById(`${key.toLowerCase()}-list-container`);
+                
+                if (assets.length > 0) {
+                    container.innerHTML = '';
+                    listContainer.querySelector(`.btn-view-more[data-category-type="${type}"]`).style.display = 'block';
+                    assets.sort((a,b) => a.name.localeCompare(b.name));
+                    activeAssetCount += assets.length;
+
+                    assets.slice(0, 5).forEach(asset => {
+                        const assetTotalCost = (asset.avgBuyPrice || 0) * (asset.totalQuantity || 0);
+                        container.appendChild(createAssetCard(asset, assetTotalCost));
+                    });
+                }
+                assets.forEach(asset => { totalInvestment += (asset.avgBuyPrice || 0) * (asset.totalQuantity || 0); });
+            }
+            
+            listContainer.querySelectorAll('.btn-view-more').forEach(btn => {
+                btn.addEventListener('click', (e) => showCategoryDetailView(e.target.dataset.categoryType));
+            });
+            
+            totalRealizedPL = allTransactions.filter(t => t.type === 'Sell').reduce((acc, t) => acc + (t.netProfit || 0), 0);
+            totalBrokerFee = allTransactions.filter(t => t.type === 'Sell').reduce((acc, t) => acc + (t.brokerFee || 0), 0);
+            updateSummaryCards(totalInvestment, totalRealizedPL, activeAssetCount, totalBrokerFee);
+            updateChartsData();
+            renderLiquidSummary();
+        }
+        
+        function renderLiquidSummary() {
+            const summaryBody = document.getElementById('liquid-summary-table-body');
+            const placeholder = document.getElementById('liquid-summary-placeholder');
+            summaryBody.innerHTML = ''; 
+            
+            if(allLiquidCash.length === 0 && allLiquidFDs.length === 0) {
+                placeholder.classList.remove('hidden'); return;
+            }
+            placeholder.classList.add('hidden');
+            const bankData = {};
+            
+            allLiquidCash.forEach(cash => {
+                const bank = cash.bank || 'Other';
+                if (!bankData[bank]) bankData[bank] = { savings: 0, fd: 0 };
+                bankData[bank].savings += cash.amount || 0;
+            });
+            allLiquidFDs.forEach(fd => {
+                const bank = fd.bank || 'Other';
+                if (!bankData[bank]) bankData[bank] = { savings: 0, fd: 0 };
+                bankData[bank].fd += fd.startAmount || 0; 
+            });
+            
+            Object.keys(bankData).sort().forEach(bank => {
+                const data = bankData[bank];
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="px-3 py-2 whitespace-nowrap text-sm font-bold text-gray-700">${bank}</td>
+                    <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-600 font-mono">${formatCurrency(data.savings)}</td>
+                    <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-600 font-mono">${formatCurrency(data.fd)}</td>
+                `;
+                summaryBody.appendChild(row);
+            });
+        }
+        
+        function showCategoryView(categoryType) {
+            document.getElementById('category-view-title').textContent = `${categoryType} Transactions`;
+            const categoryFilter = document.getElementById('category-tx-filter-category');
+            if (categoryFilter) { categoryFilter.value = categoryType; categoryFilter.disabled = true; }
+            document.getElementById('category-tx-search').value = '';
+            document.getElementById('category-tx-filter-type').value = '';
+            renderTransactionsView(categoryType); showView('category-view');
+        }
+
+        function showCategoryDetailView(categoryType) {
+            document.getElementById('category-detail-view-title').textContent = `${categoryType} Assets`;
+            const container = document.getElementById('category-detail-list-container');
+            const placeholder = document.getElementById('category-detail-placeholder');
+            container.innerHTML = ''; 
+            const assets = allAssets.filter(a => a.assetType === categoryType && a.totalQuantity > 0.00001).sort((a,b) => a.name.localeCompare(b.name));
+            if (assets.length === 0) placeholder.classList.remove('hidden');
+            else {
+                placeholder.classList.add('hidden');
+                assets.forEach(asset => container.appendChild(createAssetCard(asset, (asset.avgBuyPrice || 0) * (asset.totalQuantity || 0))));
+            }
+            showView('category-detail-view');
+        }
+
+        function createAssetCard(asset, assetTotalCost) {
+            const countryFlag = asset.country === 'India' ? '🇮🇳' : '🇺🇸';
+            const card = document.createElement('div');
+            card.className = "p-4 border border-gray-100 rounded-xl flex flex-col sm:flex-row sm:items-center sm:justify-between transition-all duration-200 hover:shadow-md hover:border-brand-200 bg-white";
+            card.innerHTML = `
+                <div class="flex-grow mb-3 sm:mb-0">
+                    <h4 class="text-base font-bold text-gray-800 flex items-center">${asset.name} <span class="ml-2 text-xs opacity-70">${countryFlag}</span></h4>
+                    <p class="text-xs text-gray-500 mt-1">Qty: <span class="font-bold text-gray-700">${asset.totalQuantity.toFixed(2)}</span> &bull; Avg: <span class="font-bold text-gray-700">${formatCurrency(asset.avgBuyPrice)}</span></p>
+                </div>
+                <div class="flex-shrink-0 text-left sm:text-right mb-3 sm:mb-0 sm:mr-6">
+                    <p class="text-sm font-bold text-brand-800 font-mono">${formatCurrency(assetTotalCost)}</p>
+                    <p class="text-[10px] text-gray-400 uppercase tracking-wide">Total Cost</p>
+                </div>
+                <div class="flex-shrink-0 flex space-x-2">
+                    <button class="btn-view text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 py-2 px-3 rounded-lg font-semibold transition-colors" data-id="${asset.id}">View</button>
+                    <button class="btn-buy text-xs bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 py-2 px-3 rounded-lg font-semibold transition-colors" data-id="${asset.id}">Buy</button>
+                    <button class="btn-sell text-xs bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 py-2 px-3 rounded-lg font-semibold transition-colors" data-id="${asset.id}">Sell</button>
+                </div>
+            `;
+            card.querySelector('.btn-view').addEventListener('click', (e) => openDetailsModal(e.target.dataset.id));
+            card.querySelector('.btn-buy').addEventListener('click', (e) => openTransactionModal('EXISTING_BUY', e.target.dataset.id));
+            card.querySelector('.btn-sell').addEventListener('click', (e) => openTransactionModal('SELL', e.target.dataset.id));
+            return card;
+        }
+        
+        function updateSummaryCards(totalInvestment, totalRealizedPL, totalInvestmentsCount, totalBrokerFee) {
+            document.getElementById('summary-total-investment').textContent = formatCurrency(totalInvestment);
+            const plEl = document.getElementById('summary-total-pl');
+            plEl.textContent = formatCurrency(totalRealizedPL);
+            plEl.className = `mt-1 text-3xl font-bold ${totalRealizedPL >= 0 ? 'text-emerald-600' : 'text-red-600'}`;
+            document.getElementById('summary-investments-count').textContent = totalInvestmentsCount;
+            document.getElementById('summary-broker-fee').textContent = formatCurrency(totalBrokerFee);
+        }
+
+        function initCharts() {
+            const allocationCtx = document.getElementById('allocation-chart').getContext('2d');
+            allocationChart = new Chart(allocationCtx, {
+                type: 'doughnut',
+                data: { labels: [], datasets: [{ data: [], backgroundColor: CHART_COLORS, borderColor: '#fff', borderWidth: 3 }] },
+                options: { 
+                    responsive: true, maintainAspectRatio: false, layout: { padding: 40 },
+                    plugins: {
+                        legend: { display: false },
+                        datalabels: {
+                            clamp: false,
+                            formatter: (value, ctx) => {
+                                let sum = 0; ctx.chart.data.datasets[0].data.forEach(data => sum += data);
+                                if (sum === 0) return '';
+                                const percentage = (value * 100 / sum);
+                                if (percentage < 3) return null;
+                                return `${ctx.chart.data.labels[ctx.dataIndex]}\n${percentage.toFixed(1)}%`;
+                            },
+                            color: '#4b5563', font: { size: 10, weight: 'bold' },
+                            anchor: 'end', align: 'end', offset: 4, textAlign: 'center'
+                        }
+                    }
+                }
+            });
+        }
+        function updateChartsData() {
+            const allocLabels = []; const allocData = []; const categoryTotals = {};
+            let totalInvestmentCost = 0;
+            allAssets.forEach(asset => {
+                 if(asset.totalQuantity > 0.00001) totalInvestmentCost += (asset.avgBuyPrice || 0) * (asset.totalQuantity || 0);
+            });
+
+            if (totalInvestmentCost === 0) {
+                document.getElementById('allocation-placeholder').classList.remove('hidden');
+                allocationChart.canvas.style.display = 'none';
+                renderCategoryLegend({}, 0); return;
+            }
+
+            const OTHERS_THRESHOLD = 0.01; let othersTotalCost = 0;
+            allAssets.forEach(asset => {
+                if(asset.totalQuantity > 0.00001) {
+                    const assetTotalCost = (asset.avgBuyPrice || 0) * (asset.totalQuantity || 0);
+                    if (assetTotalCost > 0) {
+                        const category = asset.assetType;
+                        categoryTotals[category] = (categoryTotals[category] || 0) + assetTotalCost;
+                        if (assetTotalCost / totalInvestmentCost >= OTHERS_THRESHOLD) {
+                            allocLabels.push(asset.name); allocData.push(assetTotalCost);
+                        } else othersTotalCost += assetTotalCost;
+                    }
+                }
+            });
+            
+            if (othersTotalCost > 0.01) { allocLabels.push('Others'); allocData.push(othersTotalCost); }
+            
+            document.getElementById('allocation-placeholder').classList.add('hidden');
+            allocationChart.canvas.style.display = 'block';
+            allocationChart.data.labels = allocLabels; allocationChart.data.datasets[0].data = allocData;
+            allocationChart.update();
+            renderCategoryLegend(categoryTotals, totalInvestmentCost);
+        }
+
+        function renderCategoryLegend(totals, totalCost) {
+            const legendContainer = document.getElementById('category-legend');
+            legendContainer.innerHTML = '';
+            if (totalCost === 0) return;
+            const sortedCategories = Object.keys(totals).sort((a, b) => totals[b] - totals[a]);
+            sortedCategories.forEach((category, index) => {
+                const percentage = (totals[category] * 100 / totalCost).toFixed(1);
+                const el = document.createElement('div');
+                el.className = 'flex items-center text-xs font-semibold text-gray-600 bg-gray-50 px-2 py-1 rounded-md border border-gray-200';
+                el.innerHTML = `<span class="w-2 h-2 rounded-full mr-2" style="background-color: ${CHART_COLORS[index % CHART_COLORS.length]}"></span>${category}: ${percentage}%`;
+                legendContainer.appendChild(el);
+            });
+        }
+
+        // --- Logic (Transactions, Buy, Sell) ---
+        function openTransactionModal(mode, id = null) {
+            const modal = document.getElementById('transaction-modal');
+            const form = document.getElementById('transaction-form'); form.reset();
+            const title = document.getElementById('transaction-modal-title');
+            const assetGroup = document.getElementById('asset-details-group');
+            const txTypeSelect = document.getElementById('form-tx-type');
+            const submitBtn = document.getElementById('form-submit-btn');
+            
+            document.getElementById('form-mode').value = mode;
+            document.getElementById('form-asset-id').value = '';
+            document.getElementById('form-tx-id').value = '';
+            const assetTypeEl = document.getElementById('form-asset-type');
+            assetTypeEl.innerHTML = globalSettings.categoryTypes.map(c => `<option value="${c}">${c}</option>`).join('');
+
+            if (mode === 'NEW_BUY') {
+                title.textContent = 'Add New Asset';
+                assetGroup.classList.remove('opacity-50', 'pointer-events-none');
+                txTypeSelect.value = 'Buy'; txTypeSelect.disabled = true;
+                submitBtn.textContent = 'Add Asset';
+            } else if (mode === 'EXISTING_BUY' || mode === 'SELL') {
+                const asset = allAssets.find(a => a.id === id);
+                document.getElementById('form-asset-id').value = id;
+                assetTypeEl.value = asset.assetType; document.getElementById('form-country').value = asset.country; document.getElementById('form-asset-name').value = asset.name;
+                
+                assetGroup.classList.add('opacity-50', 'pointer-events-none'); // Visually disabled
+                
+                if (mode === 'EXISTING_BUY') {
+                    title.textContent = `Buy More ${asset.name}`;
+                    txTypeSelect.value = 'Buy'; txTypeSelect.disabled = true;
+                } else {
+                    title.textContent = `Sell ${asset.name}`;
+                    txTypeSelect.value = 'Sell'; txTypeSelect.disabled = true;
+                }
+            } else if (mode === 'EDIT') {
+                const tx = allTransactions.find(t => t.id === id);
+                const asset = allAssets.find(a => a.id === tx.assetId);
+                title.textContent = 'Edit Record';
+                submitBtn.textContent = 'Update';
+                document.getElementById('form-tx-id').value = tx.id;
+                document.getElementById('form-asset-id').value = asset.id;
+                assetTypeEl.value = asset.assetType; document.getElementById('form-country').value = asset.country; document.getElementById('form-asset-name').value = asset.name;
+                assetGroup.classList.add('opacity-50', 'pointer-events-none');
+                txTypeSelect.value = tx.type; txTypeSelect.disabled = true;
+                document.getElementById('form-date').value = tx.date; document.getElementById('form-quantity').value = tx.quantity; document.getElementById('form-price').value = tx.price; document.getElementById('form-misc-costs').value = tx.miscCosts; document.getElementById('form-note').value = tx.note || '';
+            }
+            modal.classList.remove('hidden');
+        }
+
+        async function handleTransactionSubmit(e) {
+            e.preventDefault();
+            const form = e.target; const formData = new FormData(form);
+            const mode = document.getElementById('form-mode').value;
+            const assetId = document.getElementById('form-asset-id').value;
+            const txType = document.getElementById('form-tx-type').value;
+            const assetType = document.getElementById('form-asset-type').value; 
+
+            let defaultFee = 0;
+            if ((mode === 'NEW_BUY' || mode === 'EXISTING_BUY') && txType === 'Buy') {
+                 const catSettings = globalSettings.categoryFees[assetType];
+                if (catSettings) {
+                    const val = parseFloat(formData.get('quantity')) * parseFloat(formData.get('price'));
+                    defaultFee += (val * (catSettings.feePercent / 100)) + catSettings.feeFlat;
+                }
+            }
+            let miscCosts = parseFloat(formData.get('miscCosts')) || 0;
+            if(mode === 'NEW_BUY' || mode === 'EXISTING_BUY') miscCosts += defaultFee;
+
+            const txData = { date: formData.get('date'), quantity: parseFloat(formData.get('quantity')), price: parseFloat(formData.get('price')), miscCosts: miscCosts, note: formData.get('note') || '' };
+
+            if (!txData.date || txData.quantity <= 0 || txData.price < 0) { showMessage("Invalid input.", "error"); return; }
+
+            if (mode === 'NEW_BUY' || mode === 'EXISTING_BUY') {
+                const assetData = { assetType: assetType, country: formData.get('country'), name: formData.get('assetName') };
+                await executeBuy(txData, assetData, assetId);
+            } else if (mode === 'SELL') {
+                const asset = allAssets.find(a => a.id === assetId);
+                if (txData.quantity > asset.totalQuantity) { showMessage("Insufficient quantity.", "error"); return; }
+                await calculateSell(txData, asset);
+            } else if (mode === 'EDIT') await executeEdit(document.getElementById('form-tx-id').value, assetId, txData);
+        }
+
+        async function executeBuy(txData, assetData, assetId) {
+            let currentAssetId = assetId;
+            if (!assetId) {
+                currentAssetId = Date.now().toString() + Math.random().toString(36).substring(2, 9);
+                allAssets.push({ id: currentAssetId, ...assetData, totalQuantity: 0, totalCost: 0, avgBuyPrice: 0, realizedPL: 0, fifoQueue: [] });
+            }
+            allTransactions.push({ ...txData, id: Date.now().toString() + Math.random().toString(36).substring(2, 9), assetId: currentAssetId, type: 'Buy', netProfit: null, financialYear: getFinancialYear(new Date(txData.date)) });
+            rebuildAssetFromTransactions(currentAssetId);
+            saveDataToLocalStorage(); renderDashboard(); closeModal('transaction-modal'); showMessage("Buy recorded.", "success");
+        }
+        
+        async function executeEdit(txId, assetId, newTxData) {
+            const txIndex = allTransactions.findIndex(t => t.id === txId);
+            allTransactions[txIndex] = { ...allTransactions[txIndex], ...newTxData, financialYear: getFinancialYear(new Date(newTxData.date)) };
+            rebuildAssetFromTransactions(assetId);
+            saveDataToLocalStorage(); closeModal('transaction-modal'); showMessage("Updated.", "success"); renderDashboard();
+        }
+
+        async function calculateSell(txData, asset) {
+            const currentAsset = allAssets.find(a => a.id === asset.id);
+            let sellQty = txData.quantity;
+            let fifoQueue = JSON.parse(JSON.stringify(currentAsset.fifoQueue)); 
+            let totalCostOfSoldAssets = 0; let holdingPeriods = []; 
+            const sellDate = new Date(txData.date);
+            
+            while (sellQty > 0 && fifoQueue.length > 0) {
+                let buyBatch = fifoQueue.shift(); 
+                let holdingDays = (sellDate - new Date(buyBatch.date)) / (1000 * 60 * 60 * 24);
+                if (holdingDays < 0) holdingDays = 0; 
+                
+                if (buyBatch.qty <= sellQty) {
+                    totalCostOfSoldAssets += buyBatch.qty * buyBatch.price;
+                    holdingPeriods.push({ days: holdingDays, qty: buyBatch.qty });
+                    sellQty -= buyBatch.qty;
+                } else {
+                    totalCostOfSoldAssets += sellQty * buyBatch.price;
+                    holdingPeriods.push({ days: holdingDays, qty: sellQty });
+                    buyBatch.qty -= sellQty; fifoQueue.unshift(buyBatch); sellQty = 0;
+                }
+            }
+            
+            const totalRevenue = txData.quantity * txData.price;
+            const grossProfit = totalRevenue - totalCostOfSoldAssets - txData.miscCosts;
+            const avgHolding = (txData.quantity > 0) ? (holdingPeriods.reduce((acc, p) => acc + (p.days * p.qty), 0) / txData.quantity) : 0;
+            const taxSettings = globalSettings[asset.country.toLowerCase()] || globalSettings.india; 
+            
+            let termType = "Long Term", taxPercent = taxSettings.longTermTax;
+            if (avgHolding <= taxSettings.shortTermDays) { termType = "Short Term"; taxPercent = taxSettings.shortTermTax; }
+            
+            const taxAmount = (grossProfit > 0) ? grossProfit * (taxPercent / 100) : 0;
+            const brokerFee = (grossProfit > 0) ? grossProfit * (globalSettings.brokerFeePercent / 100) : 0;
+            const netProfit = grossProfit - taxAmount - brokerFee;
+
+            sellConfirmData = { txData, assetId: asset.id, grossProfit, avgHolding: avgHolding.toFixed(0), termType, taxPercent, taxAmount, profitAfterTax: grossProfit - taxAmount, brokerFee, netProfit, financialYear: getFinancialYear(sellDate) };
+            
+            document.getElementById('sell-profit').textContent = formatCurrency(grossProfit);
+            document.getElementById('sell-holding').textContent = `${avgHolding.toFixed(0)} days`;
+            document.getElementById('sell-term').textContent = termType;
+            document.getElementById('sell-tax-rate').textContent = `${taxPercent}%`;
+            document.getElementById('sell-tax-amount').textContent = `- ${formatCurrency(taxAmount)}`;
+            document.getElementById('sell-after-tax-profit').textContent = formatCurrency(grossProfit - taxAmount);
+            document.getElementById('sell-broker-rate').textContent = globalSettings.brokerFeePercent;
+            document.getElementById('sell-broker-fee').textContent = `- ${formatCurrency(brokerFee)}`;
+            document.getElementById('sell-net-profit').textContent = formatCurrency(netProfit);
+            
+            closeModal('transaction-modal'); openModal('sell-confirm-modal');
+        }
+
+        async function executeSell() {
+            const { txData, assetId, netProfit, taxAmount, brokerFee, grossProfit, avgHolding, termType, taxPercent, financialYear } = sellConfirmData;
+            allTransactions.push({ ...txData, id: Date.now().toString() + Math.random().toString(36).substring(2, 9), assetId: assetId, type: 'Sell', profit: grossProfit, holdingPeriod: avgHolding, termType, taxPercent, taxAmount, brokerFee, netProfit, financialYear });
+            rebuildAssetFromTransactions(assetId);
+            saveDataToLocalStorage(); renderDashboard(); closeModal('sell-confirm-modal'); showMessage("Sold successfully.", "success");
+        }
+        
+        function rebuildAssetFromTransactions(assetId) {
+            const asset = allAssets.find(a => a.id === assetId);
+            const transactions = allTransactions.filter(t => t.assetId === assetId).sort((a, b) => new Date(a.date) - new Date(b.date)); 
+            let totalQuantity = 0; let fifoQueue = []; let realizedPL = 0;
+            
+            for (const tx of transactions) {
+                if (tx.type === 'Buy') {
+                    totalQuantity += tx.quantity;
+                    fifoQueue.push({ qty: tx.quantity, price: ((tx.quantity * tx.price) + tx.miscCosts) / tx.quantity, date: tx.date });
+                } else {
+                    let sellQty = tx.quantity; let newFifoQueue = [];
+                    while(sellQty > 0.00001 && fifoQueue.length > 0) {
+                        let buyBatch = fifoQueue.shift();
+                        if (buyBatch.qty <= sellQty) sellQty -= buyBatch.qty;
+                        else { buyBatch.qty -= sellQty; newFifoQueue.push(buyBatch); sellQty = 0; }
+                    }
+                    newFifoQueue = [...newFifoQueue, ...fifoQueue]; fifoQueue = newFifoQueue;
+                    totalQuantity -= tx.quantity; realizedPL += tx.netProfit || 0; 
+                }
+            }
+            const totalCost = fifoQueue.reduce((acc, batch) => acc + (batch.qty * batch.price), 0);
+            asset.totalQuantity = totalQuantity; asset.totalCost = totalCost; asset.avgBuyPrice = totalQuantity > 0 ? totalCost / totalQuantity : 0; asset.fifoQueue = fifoQueue; asset.realizedPL = realizedPL;
+        }
+
+        async function openDetailsModal(assetId) {
+            const asset = allAssets.find(a => a.id === assetId);
+            document.getElementById('details-title').textContent = asset.name;
+            document.getElementById('details-qty').textContent = asset.totalQuantity.toFixed(2);
+            document.getElementById('details-avg-buy').textContent = formatCurrency(asset.avgBuyPrice);
+            document.getElementById('details-total-cost').textContent = formatCurrency(asset.totalCost); 
+            document.getElementById('details-realized-pl').textContent = formatCurrency(asset.realizedPL || 0);
+            const txListEl = document.getElementById('details-transactions-list');
+            
+            const transactions = allTransactions.filter(tx => tx.assetId === assetId).sort((a, b) => new Date(b.date) - new Date(a.date));
+            txListEl.innerHTML = transactions.length ? transactions.map(tx => `
+                <tr class="hover:bg-gray-50">
+                    <td class="px-4 py-3 text-sm text-gray-700">${tx.date}</td>
+                    <td class="px-4 py-3 text-sm font-bold ${tx.type === 'Buy' ? 'text-emerald-600' : 'text-red-500'}">${tx.type}</td>
+                    <td class="px-4 py-3 text-sm text-gray-700">${tx.quantity.toFixed(2)}</td>
+                    <td class="px-4 py-3 text-sm text-gray-700">${formatCurrency(tx.price)}</td>
+                    <td class="px-4 py-3 text-sm text-gray-500 truncate max-w-[100px]">${tx.note || '-'}</td>
+                    <td class="px-4 py-3 text-sm font-bold ${tx.netProfit > 0 ? 'text-emerald-600' : (tx.netProfit < 0 ? 'text-red-500' : 'text-gray-400')}">${tx.netProfit != null ? formatCurrency(tx.netProfit) : '-'}</td>
+                </tr>`).join('') : `<tr><td colspan="6" class="p-4 text-center text-gray-400">No history.</td></tr>`;
+            openModal('details-modal');
+        }
+        
+        function renderTransactionsView(category = null) {
+            const prefix = category ? 'category' : 'all';
+            const containerId = category ? 'category-view-list-container' : 'all-tx-list-container';
+            const search = document.getElementById(`${prefix}-tx-search`).value.toLowerCase();
+            const type = document.getElementById(`${prefix}-tx-filter-type`).value;
+            const sort = document.getElementById(`${prefix}-tx-sort`).value;
+            const txCategory = category || document.getElementById(`${prefix}-tx-filter-category`)?.value;
+
+            let filteredTx = allTransactions.map(tx => {
+                const asset = allAssets.find(a => a.id === tx.assetId);
+                return { ...tx, assetName: asset?.name || 'Deleted', assetType: asset?.assetType || 'N/A' };
+            }).filter(tx => {
+                if (txCategory && tx.assetType !== txCategory) return false;
+                if (type && tx.type !== type) return false;
+                if (search && !tx.assetName.toLowerCase().includes(search) && !tx.date.includes(search) && !(tx.note||'').toLowerCase().includes(search)) return false;
+                return true;
+            }).sort((a, b) => {
+                if (sort === 'oldest') return new Date(a.date) - new Date(b.date);
+                if (sort === 'value_desc') return (b.quantity * b.price) - (a.quantity * a.price);
+                if (sort === 'value_asc') return (a.quantity * a.price) - (b.quantity * b.price);
+                return new Date(b.date) - new Date(a.date);
+            });
+            
+            document.getElementById(containerId).innerHTML = filteredTx.length ? `
+                <table class="min-w-full divide-y divide-gray-100">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase">Date</th>
+                            <th class="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase">Asset</th>
+                            <th class="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase">Type</th>
+                            <th class="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase">Value</th>
+                            <th class="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase">Net P/L</th>
+                            <th class="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-50">
+                        ${filteredTx.map(tx => `
+                            <tr class="hover:bg-gray-50 transition-colors">
+                                <td class="px-4 py-3 text-sm text-gray-700">${tx.date}</td>
+                                <td class="px-4 py-3 text-sm font-bold text-brand-900">${tx.assetName}</td>
+                                <td class="px-4 py-3 text-sm font-bold ${tx.type==='Buy'?'text-emerald-600':'text-red-500'}">${tx.type}</td>
+                                <td class="px-4 py-3 text-sm text-gray-700 font-mono">${formatCurrency(tx.quantity * tx.price)}</td>
+                                <td class="px-4 py-3 text-sm font-bold ${tx.netProfit>0?'text-emerald-600':(tx.netProfit<0?'text-red-500':'text-gray-400')}">${tx.netProfit != null ? formatCurrency(tx.netProfit) : '-'}</td>
+                                <td class="px-4 py-3 text-sm space-x-2">
+                                    <button class="text-brand-600 hover:text-brand-800 font-semibold" onclick="openTransactionModal('EDIT', '${tx.id}')">Edit</button>
+                                    <button class="text-red-400 hover:text-red-600 font-semibold" onclick="confirmDelete('${tx.id}')">Del</button>
+                                </td>
+                            </tr>`).join('')}
+                    </tbody>
+                </table>` : `<p class="p-8 text-center text-gray-400 italic">No matches.</p>`;
+        }
+        
+        function renderLiquidAssetsView() {
+            const renderTable = (data, bodyId, placeholderId, isFD) => {
+                const body = document.getElementById(bodyId);
+                const placeholder = document.getElementById(placeholderId);
+                body.innerHTML = '';
+                if(data.length === 0) { placeholder.classList.remove('hidden'); body.closest('div').classList.add('hidden'); }
+                else {
+                    placeholder.classList.add('hidden'); body.closest('div').classList.remove('hidden');
+                    data.forEach(item => {
+                        body.innerHTML += `
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-800">${item.bank}</td>
+                                ${isFD ? `<td class="px-6 py-4 text-sm text-gray-600">${item.holder}</td>` : ''}
+                                ${isFD ? `<td class="px-6 py-4 text-sm text-gray-600">${item.startDate}</td><td class="px-6 py-4 text-sm text-gray-600">${item.endDate}</td><td class="px-6 py-4 text-sm text-gray-600">${item.renewedDate||'-'}</td><td class="px-6 py-4 text-sm text-gray-600">${item.interest}%</td>` : ''}
+                                ${!isFD ? `<td class="px-6 py-4 text-sm font-bold text-gray-800">${item.name}</td>` : ''}
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-emerald-600 font-mono">${formatCurrency(isFD ? item.startAmount : item.amount)}</td>
+                                ${isFD ? `<td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-brand-700 font-mono">${formatCurrency(item.endAmount)}</td>` : ''}
+                                ${!isFD ? `<td class="px-6 py-4 text-sm text-gray-500 truncate max-w-xs">${item.note||'-'}</td>` : ''}
+                                <td class="px-6 py-4 whitespace-nowrap text-sm space-x-3">
+                                    <button class="text-brand-600 hover:text-brand-800 font-semibold" onclick="openLiquidForm('${isFD?'FD':'CASH'}', '${item.id}')">Edit</button>
+                                    <button class="text-red-400 hover:text-red-600 font-semibold" onclick="confirmDeleteLiquid('${item.id}', '${isFD?'FD':'CASH'}')">Delete</button>
+                                </td>
+                            </tr>`;
+                    });
+                }
+            };
+            renderTable(allLiquidCash, 'liquid-cash-table-body', 'liquid-cash-placeholder', false);
+            renderTable(allLiquidFDs, 'liquid-fd-table-body', 'liquid-fd-placeholder', true);
+        }
+        
+        function openLiquidForm(mode, editId = null) {
+            const form = document.getElementById('liquid-form'); form.reset();
+            document.getElementById('form-liquid-mode').value = mode;
+            document.getElementById('form-liquid-edit-id').value = editId || '';
+            
+            const cashGroup = document.getElementById('cash-fields-group');
+            const fdGroup = document.getElementById('fd-fields-group');
+            const title = document.getElementById('liquid-modal-title');
+            
+            if (mode === 'CASH') {
+                cashGroup.style.display = 'block'; fdGroup.style.display = 'none';
+                title.textContent = editId ? 'Edit Cash' : 'Add Cash';
+                if(editId) {
+                    const c = allLiquidCash.find(x => x.id === editId);
+                    document.getElementById('form-cash-name').value = c.name; document.getElementById('form-cash-bank').value = c.bank; document.getElementById('form-cash-amount').value = c.amount; document.getElementById('form-cash-note').value = c.note;
+                }
+            } else {
+                cashGroup.style.display = 'none'; fdGroup.style.display = 'block';
+                title.textContent = editId ? 'Edit FD' : 'Add FD';
+                if(editId) {
+                    const f = allLiquidFDs.find(x => x.id === editId);
+                    document.getElementById('form-fd-bank').value = f.bank; document.getElementById('form-fd-holder').value = f.holder; document.getElementById('form-fd-startDate').value = f.startDate; document.getElementById('form-fd-endDate').value = f.endDate; document.getElementById('form-fd-renewedDate').value = f.renewedDate; document.getElementById('form-fd-interest').value = f.interest; document.getElementById('form-fd-startAmount').value = f.startAmount; document.getElementById('form-fd-endAmount').value = f.endAmount;
+                }
+            }
+            openModal('liquid-form-modal');
+        }
+        
+        function handleLiquidFormSubmit(e) {
+            e.preventDefault();
+            const mode = document.getElementById('form-liquid-mode').value;
+            const editId = document.getElementById('form-liquid-edit-id').value;
+            try {
+                if (mode === 'CASH') {
+                    const entry = { id: editId || Date.now().toString(), name: document.getElementById('form-cash-name').value, bank: document.getElementById('form-cash-bank').value, amount: parseFloat(document.getElementById('form-cash-amount').value) || 0, note: document.getElementById('form-cash-note').value || '' };
+                    if(!entry.name || !entry.bank) throw new Error("Name & Bank required.");
+                    if(editId) allLiquidCash[allLiquidCash.findIndex(c => c.id === editId)] = entry; else allLiquidCash.push(entry);
+                } else {
+                    const entry = { id: editId || Date.now().toString(), bank: document.getElementById('form-fd-bank').value, holder: document.getElementById('form-fd-holder').value, startDate: document.getElementById('form-fd-startDate').value, endDate: document.getElementById('form-fd-endDate').value, renewedDate: document.getElementById('form-fd-renewedDate').value || '', interest: parseFloat(document.getElementById('form-fd-interest').value) || 0, startAmount: parseFloat(document.getElementById('form-fd-startAmount').value) || 0, endAmount: parseFloat(document.getElementById('form-fd-endAmount').value) || 0 };
+                    if(!entry.bank || !entry.holder) throw new Error("Bank & Holder required.");
+                    if(editId) allLiquidFDs[allLiquidFDs.findIndex(f => f.id === editId)] = entry; else allLiquidFDs.push(entry);
+                }
+                saveDataToLocalStorage(); renderLiquidAssetsView(); renderLiquidSummary(); closeModal('liquid-form-modal'); showMessage("Saved.", "success");
+            } catch (err) { showMessage(err.message, "error"); }
+        }
+
+        function handleLogin(e) {
+            e.preventDefault();
+            if (document.getElementById('username').value === 'admin' && document.getElementById('password').value === '852585') {
+                sessionStorage.setItem(AUTH_KEY, 'true'); document.getElementById('login-error').classList.add('hidden');
+                document.getElementById('login-view').style.display = 'none'; document.getElementById('app-container').style.display = 'block'; initApp();
+            } else document.getElementById('login-error').classList.remove('hidden');
+        }
+
+        function handleLogout() {
+            sessionStorage.removeItem(AUTH_KEY);
+            document.getElementById('app-container').style.display = 'none';
+            document.getElementById('login-view').style.display = 'flex';
+            document.getElementById('login-form').reset();
+        }
+
+        function handleExportData() {
+            const backup = { [ASSETS_KEY]: localStorage.getItem(ASSETS_KEY), [TRANSACTIONS_KEY]: localStorage.getItem(TRANSACTIONS_KEY), [SETTINGS_KEY]: localStorage.getItem(SETTINGS_KEY), [LIQUID_CASH_KEY]: localStorage.getItem(LIQUID_CASH_KEY), [LIQUID_FD_KEY]: localStorage.getItem(LIQUID_FD_KEY), 'backupDate': new Date().toISOString() };
+            const blob = new Blob([JSON.stringify(backup, null, 2)], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a'); a.href = url; a.download = `rakhtshetu_backup_${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+            showMessage("Export downloaded.", "success");
+        }
+        function handleImportData() { document.getElementById('import-file-input').click(); }
+        function loadAllDataFromObject(data) {
+            if (!data[ASSETS_KEY] || !data[TRANSACTIONS_KEY]) throw new Error("Invalid backup.");
+            [ASSETS_KEY, TRANSACTIONS_KEY, SETTINGS_KEY, LIQUID_CASH_KEY, LIQUID_FD_KEY].forEach(k => { if(data[k]) localStorage.setItem(k, data[k]); });
+            showMessage("Data restored. Reloading...", "success");
+            setTimeout(() => location.reload(), 1500);
+        }
+
+        // --- Utility ---
+        function openModal(id) { 
+            const el = document.getElementById(id); el.classList.remove('hidden'); 
+            setTimeout(() => el.querySelector('div').classList.remove('scale-95', 'opacity-0'), 10);
+        }
+        window.closeModal = function(id) { document.getElementById(id).classList.add('hidden'); }
+        function formatCurrency(val) { return (isNaN(val) ? 0 : val).toLocaleString('en-IN', { style: 'currency', currency: 'INR' }); }
+        function getFinancialYear(d) { const y = d.getFullYear(); return d.getMonth() >= 3 ? `${y}-${(y + 1).toString().slice(-2)}` : `${y - 1}-${y.toString().slice(-2)}`; }
+        window.confirmDelete = function(id) { deleteTxId = id; deleteLiquidId = null; openModal('delete-confirm-modal'); }
+        window.confirmDeleteLiquid = function(id, mode) { deleteLiquidId = { id, mode }; deleteTxId = null; openModal('delete-confirm-modal'); }
+        window.executeDelete = async function() {
+            if (deleteTxId) {
+                const tx = allTransactions.find(t => t.id === deleteTxId);
+                const assetId = tx.assetId;
+                allTransactions = allTransactions.filter(t => t.id !== deleteTxId);
+                rebuildAssetFromTransactions(assetId);
+                // Cleanup asset if empty
+                if(allTransactions.filter(t => t.assetId === assetId).length === 0) allAssets = allAssets.filter(a => a.id !== assetId);
+                if(document.getElementById('transactions-view').style.display !== 'none') renderTransactionsView();
+            } else if (deleteLiquidId) {
+                if (deleteLiquidId.mode === 'CASH') allLiquidCash = allLiquidCash.filter(c => c.id !== deleteLiquidId.id);
+                else allLiquidFDs = allLiquidFDs.filter(f => f.id !== deleteLiquidId.id);
+                renderLiquidAssetsView();
+            }
+            saveDataToLocalStorage(); renderDashboard(); closeModal('delete-confirm-modal'); showMessage("Deleted.", "success");
+        }
+        
+        let msgTimeout;
+        function showMessage(msg, type = "success") {
+            const box = document.getElementById('message-box'); const text = document.getElementById('message-text');
+            text.textContent = msg;
+            box.className = `fixed bottom-6 right-6 px-6 py-4 rounded-xl shadow-2xl z-[100] transition-all duration-300 transform flex items-center border border-white/20 backdrop-blur-md ${type === 'success' ? 'bg-emerald-600/90 text-white' : (type === 'error' ? 'bg-red-600/90 text-white' : 'bg-brand-600/90 text-white')}`;
+            box.classList.remove('hidden', 'translate-y-10', 'opacity-0');
+            clearTimeout(msgTimeout);
+            msgTimeout = setTimeout(() => box.classList.add('translate-y-10', 'opacity-0'), 3000);
+        }
+
+        // Global Exports (Crucial for button clicks)
+        window.showView = showView;
+        window.openTransactionModal = openTransactionModal; 
+        window.openLiquidForm = openLiquidForm;
+        window.closeModal = closeModal;
+        window.openDetailsModal = openDetailsModal;
+        window.confirmDelete = confirmDelete;
+        window.confirmDeleteLiquid = confirmDeleteLiquid;
+    </script>
+</body>
+</html>

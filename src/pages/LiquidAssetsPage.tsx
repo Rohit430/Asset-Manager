@@ -21,131 +21,110 @@ export function LiquidAssetsPage() {
 
   return (
     <div className="p-4 md:p-8 space-y-6 max-w-7xl mx-auto pb-24">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+      <div className="flex justify-between items-center mb-6">
         <div>
           <h2 className="text-3xl font-bold text-gray-800">Liquid Assets</h2>
           <p className="text-muted-foreground">Cash, Savings, and Fixed Deposits</p>
         </div>
-        <div className="flex gap-2">
-          <Button 
-            className="bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 text-white font-medium py-2 px-4 rounded-lg shadow-md hover:shadow-lg transition-all"
-            onClick={() => navigate('/')}
-          >
-            &larr; Back to Dashboard
-          </Button>
-          <Button 
-            className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-medium py-2 px-4 rounded-lg shadow-md hover:shadow-lg transition-all gap-2" 
+        <button 
+          className="bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 text-white font-medium py-2 px-4 rounded-lg shadow-md hover:shadow-lg transition-all"
+          onClick={() => navigate('/')}
+        >
+          &larr; Back to Dashboard
+        </button>
+      </div>
+
+      <div className="mb-8">
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-2xl font-bold text-gray-800">Cash</h3>
+          <button 
+            className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-medium py-2 px-4 rounded-lg shadow-md hover:shadow-lg transition-all flex items-center space-x-2"
             onClick={() => navigate('/add?tab=liquid&type=Cash')}
           >
-            <Plus className="w-4 h-4" /> Add Cash Entry
-          </Button>
-          <Button 
-            className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-medium py-2 px-4 rounded-lg shadow-md hover:shadow-lg transition-all gap-2" 
-            onClick={() => navigate('/add?tab=liquid&type=FD')}
-          >
-            <Plus className="w-4 h-4" /> Add FD Entry
-          </Button>
+            <Plus className="w-5 h-5" />
+            <span>Add Cash Entry</span>
+          </button>
+        </div>
+        <div className="blurred-card rounded-xl shadow-lg overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200/50">
+              <thead className="bg-gray-50/50">
+                <tr>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Bank</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Amount</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Note</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white/50 divide-y divide-gray-200/50">
+                {liquidAssets.filter(a => a.type === 'Cash').map(asset => (
+                  <tr key={asset.id}>
+                    <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">{asset.data.bankName}</td>
+                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-700">₹{(asset.data.amount || 0).toLocaleString('en-IN')}</td>
+                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">{asset.data.notes || '-'}</td>
+                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
+                      <button className="text-red-600 hover:text-red-800 font-medium">Delete</button>
+                    </td>
+                  </tr>
+                ))}
+                {liquidAssets.filter(a => a.type === 'Cash').length === 0 && (
+                  <tr>
+                    <td colSpan={4} className="p-4 text-center text-gray-500">No cash entries added yet.</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-3">
-        <Card className="bg-blue-50 dark:bg-blue-900/20 border-blue-100 dark:border-blue-800">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <Banknote className="w-4 h-4 text-blue-600" /> Total Cash
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-blue-700">₹{stats.cash.toLocaleString('en-IN')}</div>
-          </CardContent>
-        </Card>
-        <Card className="bg-emerald-50 dark:bg-emerald-900/20 border-emerald-100 dark:border-emerald-800">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <Landmark className="w-4 h-4 text-emerald-600" /> Total FDs
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-emerald-700">₹{stats.fd.toLocaleString('en-IN')}</div>
-          </CardContent>
-        </Card>
-        <Card className="bg-slate-50 dark:bg-slate-900/20 border-slate-100 dark:border-slate-800">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Total Liquid</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">₹{stats.total.toLocaleString('en-IN')}</div>
-          </CardContent>
-        </Card>
+      <div>
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-2xl font-bold text-gray-800">Fixed Deposits</h3>
+          <button 
+            className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-medium py-2 px-4 rounded-lg shadow-md hover:shadow-lg transition-all flex items-center space-x-2"
+            onClick={() => navigate('/add?tab=liquid&type=FD')}
+          >
+            <Plus className="w-5 h-5" />
+            <span>Add FD Entry</span>
+          </button>
+        </div>
+        <div className="blurred-card rounded-xl shadow-lg overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200/50">
+              <thead className="bg-gray-50/50">
+                <tr>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Bank</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Holder</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">End Date</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Interest (%)</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Amount</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white/50 divide-y divide-gray-200/50">
+                {liquidAssets.filter(a => a.type === 'FD').map(asset => (
+                  <tr key={asset.id}>
+                    <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">{asset.data.bankName}</td>
+                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-700">{asset.data.holderName}</td>
+                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-700">{asset.data.endDate}</td>
+                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-700">{asset.data.interestRate}%</td>
+                    <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">₹{(asset.data.amount || 0).toLocaleString('en-IN')}</td>
+                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
+                      <button className="text-red-600 hover:text-red-800 font-medium">Delete</button>
+                    </td>
+                  </tr>
+                ))}
+                {liquidAssets.filter(a => a.type === 'FD').length === 0 && (
+                  <tr>
+                    <td colSpan={6} className="p-4 text-center text-gray-500">No FD entries added yet.</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
-
-      <Tabs defaultValue="cash" className="w-full">
-        <TabsList className="grid w-full grid-cols-2 max-w-md">
-          <TabsTrigger value="cash">Cash & Savings</TabsTrigger>
-          <TabsTrigger value="fd">Fixed Deposits</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="cash" className="space-y-4 pt-4">
-          <div className="grid gap-4">
-            {liquidAssets.filter(a => a.type === 'Cash').map(asset => (
-              <Card key={asset.id}>
-                <CardContent className="p-4 flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className="bg-blue-100 p-2 rounded-lg text-blue-600">
-                      <Banknote className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <h4 className="font-bold">{asset.data.bankName}</h4>
-                      <p className="text-xs text-muted-foreground">{asset.data.notes || 'No notes'}</p>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <p className="font-bold text-lg">₹{asset.data.amount.toLocaleString('en-IN')}</p>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-            {liquidAssets.filter(a => a.type === 'Cash').length === 0 && (
-              <div className="text-center py-12 text-slate-400 border-2 border-dashed rounded-xl">
-                No cash entries found.
-              </div>
-            )}
-          </div>
-        </TabsContent>
-
-        <TabsContent value="fd" className="space-y-4 pt-4">
-          <div className="grid gap-4 md:grid-cols-2">
-            {liquidAssets.filter(a => a.type === 'FD').map(asset => (
-              <Card key={asset.id}>
-                <CardHeader className="pb-2">
-                  <div className="flex justify-between items-center">
-                    <Badge variant="outline">{asset.data.bankName}</Badge>
-                    <span className="text-xs font-mono text-muted-foreground">{asset.data.endDate}</span>
-                  </div>
-                  <CardTitle className="text-lg pt-2">{asset.data.holderName}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex justify-between items-end">
-                    <div>
-                      <p className="text-xs text-muted-foreground">Interest: {asset.data.interestRate}%</p>
-                      <p className="text-lg font-bold">₹{asset.data.amount.toLocaleString('en-IN')}</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Maturity</p>
-                      <p className="font-semibold text-emerald-600">₹{asset.data.maturityAmount?.toLocaleString('en-IN') || '—'}</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-            {liquidAssets.filter(a => a.type === 'FD').length === 0 && (
-              <div className="text-center py-12 text-slate-400 border-2 border-dashed rounded-xl col-span-2">
-                No FD entries found.
-              </div>
-            )}
-          </div>
-        </TabsContent>
-      </Tabs>
     </div>
   );
 }
