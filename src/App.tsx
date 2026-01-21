@@ -217,7 +217,7 @@ function App() {
     return (
       <>
         <Toaster />
-        <Auth onUnlock={() => setIsVaultUnlocked(true)} />
+        <Auth onUnlock={() => setIsVaultUnlocked(true)} session={session} />
       </>
     );
   }

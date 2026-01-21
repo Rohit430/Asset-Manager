@@ -13,13 +13,16 @@ import {
   unwrapMasterKey 
 } from '@/lib/crypto'
 
-export function Auth({ onUnlock }: { onUnlock?: () => void }) {
+export function Auth({ onUnlock, session }: { onUnlock?: () => void, session?: any }) {
   const [loading, setLoading] = useState(false)
   const [mode, setMode] = useState<'login' | 'signup' | 'recover'>('login')
-  const [email, setEmail] = useState('')
+  const [email, setEmail] = useState(session?.user?.email || '')
   const [password, setPassword] = useState('')
   const [inputRecoveryKey, setInputRecoveryKey] = useState('')
   const [recoveryKey, setRecoveryKey] = useState<string | null>(null)
+
+  // If session exists, we are in "Unlock" mode. Lock email field.
+  const isUnlocking = !!session;
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -52,9 +55,9 @@ export function Auth({ onUnlock }: { onUnlock?: () => void }) {
         window.location.href = window.location.href
       }
     } catch (err: any) {
-      console.error(err)
+      console.error('Login/Decryption Error:', err)
       toast.error('Decryption failed. Check your password.')
-      await supabase.auth.signOut()
+      // Do not sign out automatically. Let user retry or manually logout.
     }
     
     setLoading(false)
@@ -206,7 +209,8 @@ export function Auth({ onUnlock }: { onUnlock?: () => void }) {
                     value={email} 
                     onChange={e => setEmail(e.target.value)} 
                     required 
-                    className="block w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all"
+                    disabled={isUnlocking}
+                    className={`block w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all ${isUnlocking ? 'opacity-70 cursor-not-allowed' : ''}`}
                   />
                 </div>
                 <div>
@@ -220,7 +224,12 @@ export function Auth({ onUnlock }: { onUnlock?: () => void }) {
                     className="block w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all"
                   />
                 </div>
-                <div className="flex justify-end">
+                <div className="flex justify-between items-center">
+                   {isUnlocking ? (
+                    <button type="button" onClick={() => supabase.auth.signOut()} className="text-xs text-red-600 hover:text-red-800 font-medium">
+                      Not you? Log Out
+                    </button>
+                   ) : <div></div>}
                   <button type="button" onClick={() => setMode('recover')} className="text-xs text-brand-600 hover:text-brand-800 hover:underline font-medium">
                     Forgot vault password?
                   </button>
