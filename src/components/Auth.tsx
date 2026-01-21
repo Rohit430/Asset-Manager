@@ -13,7 +13,7 @@ import {
   unwrapMasterKey 
 } from '@/lib/crypto'
 
-export function Auth() {
+export function Auth({ onUnlock }: { onUnlock?: () => void }) {
   const [loading, setLoading] = useState(false)
   const [mode, setMode] = useState<'login' | 'signup' | 'recover'>('login')
   const [email, setEmail] = useState('')
@@ -45,9 +45,12 @@ export function Auth() {
       const masterKey = await unwrapMasterKey(profile.wrapped_key, password)
       sessionStorage.setItem('master_key', masterKey)
       toast.success('Secure session initialized')
-      // Force reload to clear any stale state and trigger App re-render
-      // We reload the current URL to ensure we stay on the correct base path
-      window.location.href = window.location.href
+      
+      if (onUnlock) {
+        onUnlock()
+      } else {
+        window.location.href = window.location.href
+      }
     } catch (err: any) {
       console.error(err)
       toast.error('Decryption failed. Check your password.')

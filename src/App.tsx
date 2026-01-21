@@ -186,6 +186,7 @@ function AppLayout({ children }: { children: React.ReactNode }) {
 function App() {
   const [session, setSession] = useState<any>(null);
   const [checking, setChecking] = useState(true);
+  const [isVaultUnlocked, setIsVaultUnlocked] = useState(!!sessionStorage.getItem('master_key'));
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -208,19 +209,18 @@ function App() {
     return (
       <>
         <Toaster />
-        <Auth />
+        <Auth onUnlock={() => setIsVaultUnlocked(true)} />
       </>
     );
   }
 
-  const isUnlocked = sessionStorage.getItem('master_key');
-  if (!isUnlocked) {
+  if (!isVaultUnlocked) {
     // Session exists but vault is locked (or key is being derived)
     // Don't sign out, just show the Auth screen to allow unlocking/login completion
     return (
       <>
         <Toaster />
-        <Auth />
+        <Auth onUnlock={() => setIsVaultUnlocked(true)} />
       </>
     );
   }
