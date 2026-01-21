@@ -190,6 +190,7 @@ function App() {
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log('Initial Session:', session?.user?.id);
       setSession(session);
       setChecking(false);
     });
@@ -197,7 +198,12 @@ function App() {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
+      console.log('Auth Change:', _event, session?.user?.id);
       setSession(session);
+      if (_event === 'SIGNED_OUT') {
+        setIsVaultUnlocked(false);
+        sessionStorage.removeItem('master_key');
+      }
     });
 
     return () => subscription.unsubscribe();
@@ -205,16 +211,7 @@ function App() {
 
   if (checking) return <div className="h-screen flex items-center justify-center">Loading Fortress...</div>;
 
-  if (!session) {
-    return (
-      <>
-        <Toaster />
-        <Auth onUnlock={() => setIsVaultUnlocked(true)} />
-      </>
-    );
-  }
-
-  if (!isVaultUnlocked) {
+  if (!session || !isVaultUnlocked) {
     // Session exists but vault is locked (or key is being derived)
     // Don't sign out, just show the Auth screen to allow unlocking/login completion
     return (
