@@ -1,11 +1,8 @@
 import { useMemo, useState } from 'react';
 import { useData } from '@/hooks/useData';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { rebuildAssetMetrics } from '@/lib/fifo';
-import { Search, Plus, ArrowRight, Wallet } from 'lucide-react';
+import { Search, Wallet } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';

@@ -1,16 +1,14 @@
 import { useMemo, useState } from 'react';
 import { useData } from '@/hooks/useData';
-import { Card, CardContent } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Search, ArrowUpCircle, ArrowDownCircle, Info, Edit2 } from 'lucide-react';
+import { Search, Edit2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
 
 export function TransactionsPage() {
   const { assets, transactions, loading } = useData();
   const [search, setSearch] = useState('');
+  const [typeFilter, setTypeFilter] = useState('All');
+  const [sortBy, setSortBy] = useState('newest');
   const navigate = useNavigate();
 
   const displayTransactions = useMemo(() => {

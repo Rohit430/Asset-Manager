@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { HashRouter, Routes, Route, Navigate, Link, useLocation } from 'react-router-dom';
 import { supabase } from '@/lib/supabase';
 import { Auth } from '@/components/Auth';
-import { LayoutDashboard, Wallet, ArrowRightLeft, Settings, PlusCircle, Download, Upload, LogOut } from 'lucide-react';
+import { LayoutDashboard, Wallet, ArrowRightLeft, Settings, PlusCircle } from 'lucide-react';
 import { useData } from '@/hooks/useData';
 import { Dashboard } from '@/components/Dashboard';
 import { AssetsPage } from '@/pages/AssetsPage';

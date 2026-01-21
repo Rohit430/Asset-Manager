@@ -1,21 +1,10 @@
-import { useMemo } from 'react';
 import { useData } from '@/hooks/useData';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Landmark, Banknote, Plus } from 'lucide-react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Plus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 export function LiquidAssetsPage() {
   const { liquidAssets, loading } = useData();
   const navigate = useNavigate();
-
-  const stats = useMemo(() => {
-    const cash = liquidAssets.filter(a => a.type === 'Cash').reduce((acc, a) => acc + (a.data.amount || 0), 0);
-    const fd = liquidAssets.filter(a => a.type === 'FD').reduce((acc, a) => acc + (a.data.amount || 0), 0);
-    return { cash, fd, total: cash + fd };
-  }, [liquidAssets]);
 
   if (loading) return <div className="p-8 text-center">Loading liquid assets...</div>;
 

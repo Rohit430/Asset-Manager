@@ -1,11 +1,9 @@
 import { useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useData } from '@/hooks/useData';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { rebuildAssetMetrics } from '@/lib/fifo';
-import { ChevronLeft, TrendingUp, TrendingDown, Clock, Tag, Edit2 } from 'lucide-react';
+import { ChevronLeft, Edit2 } from 'lucide-react';
 import { format } from 'date-fns';
 
 export function AssetDetailsPage() {

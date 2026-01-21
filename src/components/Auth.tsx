@@ -184,7 +184,7 @@ export function Auth() {
               </svg>
             </span>
             <h1 className="text-3xl font-bold text-brand-900 tracking-tight">Iris</h1>
-            <p class="text-brand-500 font-medium mt-1">Asset Manager</p>
+            <p className="text-brand-500 font-medium mt-1">Asset Manager</p>
           </div>
 
           <Tabs value={mode} onValueChange={(v: any) => setMode(v)} className="w-full">
@@ -207,7 +207,7 @@ export function Auth() {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="password" name="password" className="block text-sm font-semibold text-gray-700 mb-1">Password</Label>
+                  <Label htmlFor="password" className="block text-sm font-semibold text-gray-700 mb-1">Password</Label>
                   <Input 
                     id="password" 
                     type="password" 
@@ -246,7 +246,7 @@ export function Auth() {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="signup-password" name="password" className="block text-sm font-semibold text-gray-700 mb-1">Password</Label>
+                  <Label htmlFor="signup-password" className="block text-sm font-semibold text-gray-700 mb-1">Password</Label>
                   <Input 
                     id="signup-password" 
                     type="password" 
