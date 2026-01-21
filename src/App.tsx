@@ -215,8 +215,14 @@ function App() {
 
   const isUnlocked = sessionStorage.getItem('master_key');
   if (!isUnlocked) {
-    supabase.auth.signOut();
-    return null; 
+    // Session exists but vault is locked (or key is being derived)
+    // Don't sign out, just show the Auth screen to allow unlocking/login completion
+    return (
+      <>
+        <Toaster />
+        <Auth />
+      </>
+    );
   }
 
   return (
