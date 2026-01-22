@@ -47,29 +47,29 @@ export function YearlySummary() {
       <div className="blurred-card rounded-xl shadow-lg overflow-hidden">
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200/50">
-            <thead className="bg-gray-50/50">
+            <thead className="bg-brand-50/50">
               <tr>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Financial Year</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total Invested</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total Sold</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Gross Profit</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total Tax</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total Broker Fee</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Net Profit/Loss</th>
+                <th className="px-6 py-4 text-left text-xs font-bold text-brand-800 uppercase tracking-wider">Financial Year</th>
+                <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Invested</th>
+                <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Sold Value</th>
+                <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Gross P/L</th>
+                <th className="px-6 py-4 text-left text-xs font-bold text-red-400 uppercase tracking-wider">Tax</th>
+                <th className="px-6 py-4 text-left text-xs font-bold text-red-400 uppercase tracking-wider">Brokerage</th>
+                <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Net P/L</th>
               </tr>
             </thead>
-            <tbody className="bg-white/50 divide-y divide-gray-200/50">
+            <tbody className="bg-white divide-y divide-gray-50">
               {yearlyData.map(([fy, data]) => (
                 <tr key={fy}>
-                  <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">{fy}</td>
-                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-700">₹{data.invested.toLocaleString('en-IN')}</td>
-                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-700">₹{data.sold.toLocaleString('en-IN')}</td>
-                  <td className={`px-4 py-3 whitespace-nowrap text-sm ${data.profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  <td className="px-6 py-3 whitespace-nowrap text-sm font-bold text-brand-900">{fy}</td>
+                  <td className="px-6 py-3 whitespace-nowrap text-sm text-gray-600">₹{data.invested.toLocaleString('en-IN')}</td>
+                  <td className="px-6 py-3 whitespace-nowrap text-sm text-gray-600">₹{data.sold.toLocaleString('en-IN')}</td>
+                  <td className="px-6 py-3 whitespace-nowrap text-sm text-gray-600">
                     ₹{data.profit.toLocaleString('en-IN')}
                   </td>
-                  <td className="px-4 py-3 whitespace-nowrap text-sm text-red-600">₹{data.tax.toLocaleString('en-IN')}</td>
-                  <td className="px-4 py-3 whitespace-nowrap text-sm text-red-600">₹{data.brokerFee.toLocaleString('en-IN')}</td>
-                  <td className={`px-4 py-3 whitespace-nowrap text-sm font-medium ${data.netProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  <td className="px-6 py-3 whitespace-nowrap text-sm text-red-400 font-medium">₹{data.tax.toLocaleString('en-IN')}</td>
+                  <td className="px-6 py-3 whitespace-nowrap text-sm text-red-400 font-medium">₹{data.brokerFee.toLocaleString('en-IN')}</td>
+                  <td className={`px-6 py-3 whitespace-nowrap text-sm font-bold ${data.netProfit >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
                     ₹{data.netProfit.toLocaleString('en-IN')}
                   </td>
                 </tr>

@@ -77,41 +77,45 @@ export function AssetsPage() {
         </div>
       </div>
 
-      <div className="blurred-card rounded-xl shadow-lg overflow-hidden">
-        <div className="divide-y divide-gray-200/50">
+      <div className="blurred-card rounded-2xl shadow-lg overflow-hidden border border-gray-100 p-4">
+        <div className="space-y-3">
           {filteredAssets.map(asset => {
             const countryFlag = asset.country === 'India' ? '🇮🇳' : '🇺🇸';
             return (
               <div 
                 key={asset.id} 
-                className="p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between transition-all duration-200 hover:bg-gray-50/50 cursor-pointer"
+                className="p-4 border border-gray-100 rounded-xl flex flex-col sm:flex-row sm:items-center sm:justify-between transition-all duration-200 hover:shadow-md hover:border-brand-200 bg-white"
                 onClick={() => navigate(`/assets/${asset.id}`)}
               >
-                <div className="flex-grow mb-2 sm:mb-0">
-                  <h4 className="text-base font-medium text-blue-700">{asset.data.name} <span className="text-sm font-normal text-gray-500">{countryFlag}</span></h4>
-                  <p className="text-sm text-gray-500">
-                    Qty: <span className="font-medium">{asset.totalQuantity.toFixed(4)}</span> | 
-                    Avg. Buy: <span className="font-medium">₹{asset.avgBuyPrice.toLocaleString('en-IN', { maximumFractionDigits: 2 })}</span>
+                <div className="flex-grow mb-3 sm:mb-0">
+                  <h4 className="text-base font-bold text-gray-800 flex items-center">
+                    {asset.data.name} 
+                    <span className="ml-2 text-xs opacity-70">{countryFlag}</span>
+                  </h4>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Qty: <span className="font-bold text-gray-700">{asset.totalQuantity.toFixed(4)}</span> | 
+                    Avg: <span className="font-bold text-gray-700">₹{asset.avgBuyPrice.toLocaleString('en-IN', { maximumFractionDigits: 2 })}</span>
                   </p>
                 </div>
-                <div className="flex-shrink-0 text-left sm:text-right mb-2 sm:mb-0 sm:mr-6">
-                  <p className="text-lg font-bold text-gray-900">Total Cost: ₹{asset.totalCost.toLocaleString('en-IN')}</p>
+                <div className="flex-shrink-0 text-left sm:text-right mb-3 sm:mb-0 sm:mr-6">
+                  <p className="text-sm font-bold text-brand-800 font-mono">₹{asset.totalCost.toLocaleString('en-IN')}</p>
+                  <p className="text-[10px] text-gray-400 uppercase tracking-wide">Total Cost</p>
                 </div>
                 <div className="flex-shrink-0 flex space-x-2" onClick={e => e.stopPropagation()}>
                   <button 
-                    className="text-xs bg-gray-200 hover:bg-gray-300 text-gray-800 py-1.5 px-3 rounded-md transition-colors"
+                    className="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 py-2 px-3 rounded-lg font-semibold transition-colors"
                     onClick={() => navigate(`/assets/${asset.id}`)}
                   >
                     View
                   </button>
                   <button 
-                    className="text-xs bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white py-1.5 px-3 rounded-md shadow-sm hover:shadow-md transition-all font-medium"
+                    className="text-xs bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 py-2 px-3 rounded-lg font-semibold transition-colors"
                     onClick={() => navigate(`/add?tab=transaction&type=Buy&asset=${asset.id}`)}
                   >
                     Buy
                   </button>
                   <button 
-                    className="text-xs bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white py-1.5 px-3 rounded-md shadow-sm hover:shadow-md transition-all font-medium"
+                    className="text-xs bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 py-2 px-3 rounded-lg font-semibold transition-colors"
                     onClick={() => navigate(`/add?tab=transaction&type=Sell&asset=${asset.id}`)}
                   >
                     Sell
