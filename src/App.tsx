@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react';
-import { HashRouter, Routes, Route, Navigate, Link, useLocation } from 'react-router-dom';
+import { HashRouter, Routes, Route, Navigate, Link } from 'react-router-dom';
 import { supabase } from '@/lib/supabase';
 import { Auth } from '@/components/Auth';
-import { LayoutDashboard, Wallet, ArrowRightLeft, Settings, PlusCircle } from 'lucide-react';
 import { useData } from '@/hooks/useData';
 import { Dashboard } from '@/components/Dashboard';
 import { AssetsPage } from '@/pages/AssetsPage';
@@ -15,7 +14,6 @@ import { ConflictResolver } from '@/components/ConflictResolver';
 import { Toaster } from 'sonner';
 
 function AppLayout({ children }: { children: React.ReactNode }) {
-  const location = useLocation();
   const { assets, transactions, liquidAssets, preferences } = useData();
 
   const handleExport = async () => {

@@ -1,6 +1,5 @@
 import { useMemo, useState } from 'react';
 import { useData } from '@/hooks/useData';
-import { Search, Edit2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
 

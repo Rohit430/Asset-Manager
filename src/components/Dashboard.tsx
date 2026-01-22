@@ -3,13 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import { useData } from '@/hooks/useData';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 import { rebuildAssetMetrics } from '@/lib/fifo';
-import { format } from 'date-fns';
 
 // Colors matching the original prototype
 const COLORS = ['#9333ea', '#a855f7', '#c084fc', '#d8b4fe', '#e9d5ff', '#7e22ce', '#6b21a8', '#581c87', '#e5e7eb', '#9ca3af'];
 
 export function Dashboard() {
-  const { assets, transactions, liquidAssets, preferences, loading, syncing } = useData();
+  const { assets, transactions, liquidAssets, preferences, loading } = useData();
   const navigate = useNavigate();
 
   const processedAssets = useMemo(() => {
