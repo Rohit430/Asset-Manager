@@ -63,14 +63,6 @@ function AppLayout({ children }: { children: React.ReactNode }) {
     input.click();
   };
 
-  const navItems = [
-    { icon: LayoutDashboard, label: 'Dashboard', path: '/' },
-    { icon: Wallet, label: 'Assets', path: '/assets' },
-    { icon: PlusCircle, label: 'Add', path: '/add', highlight: true },
-    { icon: ArrowRightLeft, label: 'Transactions', path: '/transactions' },
-    { icon: Settings, label: 'Settings', path: '/settings' },
-  ];
-
   const handleLogout = async () => {
     await supabase.auth.signOut();
     sessionStorage.clear();
@@ -78,19 +70,19 @@ function AppLayout({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <div className="min-h-screen bg-brand-50">
+    <div className="min-h-screen bg-brand-50 flex flex-col font-sans text-gray-800">
       <header className="glass-header text-white shadow-xl sticky top-0 z-40">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="flex justify-between items-center h-20">
-            <Link to="/" className="flex items-center space-x-3 cursor-pointer group">
-              <div className="bg-white/20 backdrop-blur-sm p-2 rounded-xl ring-1 ring-white/30 group-hover:bg-white/30 transition-all">
-                <svg className="h-6 w-6 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+          <div className="flex justify-between items-center h-28">
+            <Link to="/" className="flex items-center space-x-4 cursor-pointer group">
+              <div className="bg-white/20 backdrop-blur-sm p-3 rounded-2xl ring-1 ring-white/30 group-hover:scale-105 transition-transform duration-300">
+                <svg className="h-8 w-8 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M18.375 2.25c-1.035 0-1.875.84-1.875 1.875v15.75c0 1.035.84 1.875 1.875 1.875h.75c1.035 0 1.875-.84 1.875-1.875V4.125c0-1.035-.84-1.875-1.875-1.875h-.75ZM9.75 8.625c0-1.035.84-1.875 1.875-1.875h.75c1.035 0 1.875.84 1.875 1.875v11.25c0 1.035-.84 1.875-1.875 1.875h-.75a1.875 1.875 0 0 1-1.875-1.875V8.625ZM3 13.125c0-1.035.84-1.875 1.875-1.875h.75c1.035 0 1.875.84 1.875 1.875v6.75c0 1.035-.84 1.875-1.875 1.875h-.75A1.875 1.875 0 0 1 3 19.875v-6.75Z" />
                 </svg>
               </div>
               <div>
-                <h1 className="text-xl font-bold tracking-tight">Iris</h1>
-                <p className="text-xs text-brand-100 font-medium">Asset Manager</p>
+                <h1 className="text-3xl font-bold tracking-tight">Iris</h1>
+                <p className="text-sm text-brand-100 font-medium">Asset Manager</p>
               </div>
             </Link>
             
@@ -126,6 +118,12 @@ function AppLayout({ children }: { children: React.ReactNode }) {
                 </svg>
               </Link>
 
+              <Link to="/settings" title="Settings" className="p-2 rounded-lg hover:bg-white/10 transition-colors text-brand-50 group">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6 transition-transform duration-500 ease-in-out group-hover:rotate-90">
+                    <path fillRule="evenodd" d="M11.078 2.25c-.917 0-1.699.663-1.85 1.567L9.05 4.889c-.02.12-.115.26-.297.348a7.493 7.493 0 00-.986.57c-.166.115-.334.126-.45.083L6.3 5.508a1.875 1.875 0 00-2.282.819l-.922 1.597a1.875 1.875 0 00.432 2.385l.84.692c.095.078.17.229.154.43a7.598 7.598 0 000 1.139c.015.2-.059.352-.153.43l-.841.692a1.875 1.875 0 00-.432 2.385l.922 1.597a1.875 1.875 0 002.282.818l1.019-.382c.115-.043.283-.031.45.082.312.214.641.405.985.57.182.088.277.228.297.35l.178 1.071c.151.904.933 1.567 1.85 1.567h1.844c.916 0 1.699-.663 1.85-1.567l.178-1.072c.02-.12.114-.26.297-.349.344-.165.673-.356.985-.57.167-.114.335-.125.45-.082l1.02.382a1.875 1.875 0 002.28-.819l.923-1.597a1.875 1.875 0 00-.432-2.385l-.84-.692c-.095-.078-.17-.229-.154-.43a7.614 7.614 0 000-1.139c-.016-.2.059-.352.153-.43l.84-.692c.708-.582.891-1.59.433-2.385l-.922-1.597a1.875 1.875 0 00-2.282-.818l-1.02.382c-.114.043-.282.031-.449-.083a7.49 7.49 0 00-.985-.57c-.183-.087-.277-.227-.297-.348l-.179-1.072a1.875 1.875 0 00-1.85-1.567h-1.843zM12 15.75a3.75 3.75 0 100-7.5 3.75 3.75 0 000 7.5z" clipRule="evenodd" />
+                </svg>
+              </Link>
+
               <div className="flex items-center bg-brand-900/40 rounded-lg p-1 space-x-1 hidden sm:flex">
                  <button onClick={handleExport} title="Export Data" className="p-1.5 rounded hover:bg-white/20 transition-colors text-brand-100 group">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 transition-transform duration-500 ease-in-out group-hover:-translate-y-1">
@@ -139,12 +137,6 @@ function AppLayout({ children }: { children: React.ReactNode }) {
                 </button>
               </div>
 
-              <Link to="/settings" title="Settings" className="p-2 rounded-lg hover:bg-white/10 transition-colors text-brand-50 group">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6 transition-transform duration-500 ease-in-out group-hover:rotate-90">
-                    <path fillRule="evenodd" d="M11.078 2.25c-.917 0-1.699.663-1.85 1.567L9.05 4.889c-.02.12-.115.26-.297.348a7.493 7.493 0 00-.986.57c-.166.115-.334.126-.45.083L6.3 5.508a1.875 1.875 0 00-2.282.819l-.922 1.597a1.875 1.875 0 00.432 2.385l.84.692c.095.078.17.229.154.43a7.598 7.598 0 000 1.139c.015.2-.059.352-.153.43l-.841.692a1.875 1.875 0 00-.432 2.385l.922 1.597a1.875 1.875 0 002.282.818l1.019-.382c.115-.043.283-.031.45.082.312.214.641.405.985.57.182.088.277.228.297.35l.178 1.071c.151.904.933 1.567 1.85 1.567h1.844c.916 0 1.699-.663 1.85-1.567l.178-1.072c.02-.12.114-.26.297-.349.344-.165.673-.356.985-.57.167-.114.335-.125.45-.082l1.02.382a1.875 1.875 0 002.28-.819l.923-1.597a1.875 1.875 0 00-.432-2.385l-.84-.692c-.095-.078-.17-.229-.154-.43a7.614 7.614 0 000-1.139c-.016-.2.059-.352.153-.43l.84-.692c.708-.582.891-1.59.433-2.385l-.922-1.597a1.875 1.875 0 00-2.282-.818l-1.02.382c-.114.043-.282.031-.449-.083a7.49 7.49 0 00-.985-.57c-.183-.087-.277-.227-.297-.348l-.179-1.072a1.875 1.875 0 00-1.85-1.567h-1.843zM12 15.75a3.75 3.75 0 100-7.5 3.75 3.75 0 000 7.5z" clipRule="evenodd" />
-                </svg>
-              </Link>
-
               <button onClick={handleLogout} title="Logout" className="p-2 rounded-lg hover:bg-brand-900 transition-colors text-brand-200 group">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 transition-transform duration-500 ease-in-out group-hover:translate-x-1">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m-3-1.5-3-3m0 0 3-3m-3 3H21" />
@@ -153,32 +145,73 @@ function AppLayout({ children }: { children: React.ReactNode }) {
             </div>
           </div>
         </div>
+        
+        {/* Bottom accent line */}
+        <div className="h-1 bg-gradient-to-r from-violet-400 via-fuchsia-500 to-purple-500"></div>
       </header>
 
-      <main className="container mx-auto p-4 sm:p-6 lg:p-8 pb-24">
+      <main className="container mx-auto p-4 sm:p-6 lg:p-8 flex-grow">
         {children}
       </main>
 
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-lg border-t border-brand-100 flex justify-around p-2 z-50 safe-area-pb shadow-lg">
-        {navItems.map((item) => {
-          const isActive = location.pathname === item.path;
-          if (item.highlight) {
-            return (
-              <Link key={item.path} to={item.path} className="-mt-8">
-                <div className="bg-gradient-to-r from-brand-600 to-brand-700 text-white p-4 rounded-full shadow-lg hover:scale-105 transition-transform border-4 border-brand-50">
-                  <item.icon className="w-6 h-6" />
+      <footer className="bg-brand-900 text-white border-t border-brand-800 relative z-10">
+        <div className="h-1 bg-gradient-to-r from-violet-400 via-fuchsia-500 to-purple-500"></div>
+        <div className="container mx-auto px-6 py-12">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
+            <div className="space-y-4">
+              <div className="flex items-center space-x-3">
+                <div className="bg-white/10 p-2 rounded-lg">
+                  <svg className="h-6 w-6 text-brand-300" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M18.375 2.25c-1.035 0-1.875.84-1.875 1.875v15.75c0 1.035.84 1.875 1.875 1.875h.75c1.035 0 1.875-.84 1.875-1.875V4.125c0-1.035-.84-1.875-1.875-1.875h-.75ZM9.75 8.625c0-1.035.84-1.875 1.875-1.875h.75c1.035 0 1.875.84 1.875 1.875v11.25c0 1.035-.84 1.875-1.875 1.875h-.75a1.875 1.875 0 0 1-1.875-1.875V8.625ZM3 13.125c0-1.035.84-1.875 1.875-1.875h.75c1.035 0 1.875.84 1.875 1.875v6.75c0 1.035-.84 1.875-1.875 1.875h-.75A1.875 1.875 0 0 1 3 19.875v-6.75Z" />
+                  </svg>
                 </div>
-              </Link>
-            )
-          }
-          return (
-            <Link key={item.path} to={item.path} className={`flex flex-col items-center p-2 min-w-[64px] ${isActive ? 'text-brand-700' : 'text-slate-400'}`}>
-              <item.icon className="w-6 h-6" />
-              <span className="text-[10px] font-medium mt-1">{item.label}</span>
-            </Link>
-          )
-        })}
-      </nav>
+                <span className="text-2xl font-bold tracking-tight">Iris</span>
+              </div>
+              <p className="text-brand-200 text-sm leading-relaxed">
+                Secure, private, and offline-first asset management. Track your investments and liquid assets with complete peace of mind.
+              </p>
+            </div>
+
+            <div>
+              <h4 className="text-lg font-bold mb-6 text-brand-100">Quick Links</h4>
+              <ul className="space-y-3 text-sm text-brand-200">
+                <li><Link to="/" className="hover:text-white hover:translate-x-1 transition-all inline-block">Dashboard</Link></li>
+                <li><Link to="/transactions" className="hover:text-white hover:translate-x-1 transition-all inline-block">Transactions</Link></li>
+                <li><Link to="/liquid" className="hover:text-white hover:translate-x-1 transition-all inline-block">Liquid Assets</Link></li>
+                <li><Link to="/settings" className="hover:text-white hover:translate-x-1 transition-all inline-block">Settings</Link></li>
+              </ul>
+            </div>
+
+            <div>
+              <h4 className="text-lg font-bold mb-6 text-brand-100">Portfolios</h4>
+              <ul className="space-y-3 text-sm text-brand-200">
+                {(preferences?.categories || ["Equity", "Mutual Funds", "Real Estate", "Commodity", "Bonds"]).slice(0,5).map(c => (
+                  <li key={c}><Link to={`/assets?category=${encodeURIComponent(c)}`} className="hover:text-white hover:translate-x-1 transition-all inline-block">{c}</Link></li>
+                ))}
+              </ul>
+            </div>
+
+            <div>
+              <h4 className="text-lg font-bold mb-6 text-brand-100">Actions</h4>
+              <div className="space-y-3">
+                <Link to="/add" className="w-full bg-brand-700 hover:bg-brand-600 text-white py-2 px-4 rounded-lg text-sm font-semibold transition-colors flex items-center justify-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4"/></svg>
+                  New Asset
+                </Link>
+                <button onClick={handleExport} className="w-full bg-transparent border border-brand-700 hover:bg-brand-800 text-brand-100 py-2 px-4 rounded-lg text-sm font-semibold transition-colors flex items-center justify-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                  Backup Data
+                </button>
+              </div>
+            </div>
+          </div>
+          
+          <div className="border-t border-brand-800 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center text-xs text-brand-400">
+            <p>&copy; 2025 Iris Asset Manager. All rights reserved.</p>
+            <p className="mt-2 md:mt-0">Fortress Architecture &bull; End-to-End Encrypted &bull; Secure</p>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
