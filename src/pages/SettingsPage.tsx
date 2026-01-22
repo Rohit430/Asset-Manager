@@ -49,20 +49,17 @@ export function SettingsPage() {
 
   return (
     <div className="p-4 md:p-8 space-y-6 max-w-4xl mx-auto pb-24">
-      <div className="flex justify-between items-center mb-6">
-        <div>
-          <h2 className="text-3xl font-bold text-gray-800">Settings</h2>
-          <p className="text-muted-foreground">Configure your tax rules and app preferences</p>
-        </div>
+      <div className="flex justify-between items-center mb-6 bg-white p-4 rounded-xl shadow-sm border border-brand-100">
+        <h2 className="text-2xl font-bold text-brand-900">System Settings</h2>
         <button 
-          className="bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 text-white font-medium py-2 px-4 rounded-lg shadow-md hover:shadow-lg transition-all"
+          className="bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 font-medium py-2 px-4 rounded-lg shadow-sm transition-all text-sm flex items-center"
           onClick={() => navigate('/')}
         >
-          &larr; Back to Dashboard
+          &larr; Back
         </button>
       </div>
 
-      <div className="blurred-card p-6 rounded-xl shadow-lg space-y-8">
+      <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-100 space-y-10">
         <Tabs defaultValue="tax" className="w-full">
           <TabsList className="grid w-full grid-cols-2 mb-8">
             <TabsTrigger value="tax">Taxation Rules</TabsTrigger>
@@ -73,12 +70,10 @@ export function SettingsPage() {
             <div className="grid md:grid-cols-2 gap-8">
               {/* India Settings */}
               <div className="space-y-4">
-                <h3 className="text-xl font-semibold text-gray-900 border-b pb-2 flex items-center gap-2">
-                  <span>🇮🇳</span> India Tax Rules
-                </h3>
+                <h3 className="text-md font-bold text-brand-700 flex items-center"><span className="mr-2">🇮🇳</span> India Tax Rules</h3>
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <Label className="text-gray-700">Short Term Threshold (Days)</Label>
+                    <Label className="block text-xs font-bold text-gray-500 uppercase mb-1">Short Term Threshold (Days)</Label>
                     <Input 
                       type="number" 
                       value={localPrefs.taxSettings.india.shortTermDays}
@@ -89,13 +84,13 @@ export function SettingsPage() {
                           india: { ...localPrefs.taxSettings.india, shortTermDays: parseInt(e.target.value) }
                         }
                       })}
-                      className="border-gray-300 focus:ring-blue-500"
+                      className="block w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-brand-500 focus:border-brand-500 transition-all"
                     />
-                    <p className="text-xs text-gray-500 italic">Holding period &lt;= this value is Short Term.</p>
+                    <p className="mt-1 text-xs text-gray-400">Holding &lt;= this value is Short Term.</p>
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label className="text-gray-700">Short Term (%)</Label>
+                      <Label className="block text-xs font-bold text-gray-500 uppercase mb-1">Short Term (%)</Label>
                       <Input 
                         type="number" 
                         value={localPrefs.taxSettings.india.shortTermTax}
@@ -106,11 +101,11 @@ export function SettingsPage() {
                             india: { ...localPrefs.taxSettings.india, shortTermTax: parseFloat(e.target.value) }
                           }
                         })}
-                        className="border-gray-300 focus:ring-blue-500"
+                        className="block w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-brand-500 focus:border-brand-500 transition-all"
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label className="text-gray-700">Long Term (%)</Label>
+                      <Label className="block text-xs font-bold text-gray-500 uppercase mb-1">Long Term (%)</Label>
                       <Input 
                         type="number" 
                         value={localPrefs.taxSettings.india.longTermTax}
@@ -121,7 +116,7 @@ export function SettingsPage() {
                             india: { ...localPrefs.taxSettings.india, longTermTax: parseFloat(e.target.value) }
                           }
                         })}
-                        className="border-gray-300 focus:ring-blue-500"
+                        className="block w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-brand-500 focus:border-brand-500 transition-all"
                       />
                     </div>
                   </div>
@@ -130,12 +125,10 @@ export function SettingsPage() {
 
               {/* US Settings */}
               <div className="space-y-4">
-                <h3 className="text-xl font-semibold text-gray-900 border-b pb-2 flex items-center gap-2">
-                  <span>🇺🇸</span> US Tax Rules
-                </h3>
+                <h3 className="text-md font-bold text-blue-700 flex items-center"><span className="mr-2">🇺🇸</span> US Tax Rules</h3>
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <Label className="text-gray-700">Short Term Threshold (Days)</Label>
+                    <Label className="block text-xs font-bold text-gray-500 uppercase mb-1">Short Term Threshold (Days)</Label>
                     <Input 
                       type="number" 
                       value={localPrefs.taxSettings.us.shortTermDays}
@@ -146,13 +139,13 @@ export function SettingsPage() {
                           us: { ...localPrefs.taxSettings.us, shortTermDays: parseInt(e.target.value) }
                         }
                       })}
-                      className="border-gray-300 focus:ring-blue-500"
+                      className="block w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-brand-500 focus:border-brand-500 transition-all"
                     />
-                    <p className="text-xs text-gray-500 italic">Holding period &lt;= this value is Short Term.</p>
+                    <p className="mt-1 text-xs text-gray-400">Holding &lt;= this value is Short Term.</p>
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label className="text-gray-700">Short Term (%)</Label>
+                      <Label className="block text-xs font-bold text-gray-500 uppercase mb-1">Short Term (%)</Label>
                       <Input 
                         type="number" 
                         value={localPrefs.taxSettings.us.shortTermTax}
@@ -163,11 +156,11 @@ export function SettingsPage() {
                             us: { ...localPrefs.taxSettings.us, shortTermTax: parseFloat(e.target.value) }
                           }
                         })}
-                        className="border-gray-300 focus:ring-blue-500"
+                        className="block w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-brand-500 focus:border-brand-500 transition-all"
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label className="text-gray-700">Long Term (%)</Label>
+                      <Label className="block text-xs font-bold text-gray-500 uppercase mb-1">Long Term (%)</Label>
                       <Input 
                         type="number" 
                         value={localPrefs.taxSettings.us.longTermTax}
@@ -178,7 +171,7 @@ export function SettingsPage() {
                             us: { ...localPrefs.taxSettings.us, longTermTax: parseFloat(e.target.value) }
                           }
                         })}
-                        className="border-gray-300 focus:ring-blue-500"
+                        className="block w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-brand-500 focus:border-brand-500 transition-all"
                       />
                     </div>
                   </div>
@@ -190,9 +183,9 @@ export function SettingsPage() {
           <TabsContent value="categories" className="space-y-8">
             <div className="space-y-6">
               <div className="space-y-4">
-                <h3 className="text-xl font-semibold text-gray-900 border-b pb-2">Asset Categories</h3>
+                <h3 className="text-xl font-bold text-gray-800 mb-4 border-b border-gray-100 pb-2">Asset Types</h3>
                 <div className="space-y-2">
-                  <Label className="text-gray-700">Categories (one per line)</Label>
+                  <Label className="block text-sm font-medium text-gray-600 mb-2">Categories (one per line)</Label>
                   <textarea 
                     rows={6}
                     value={localPrefs.categories.join('\n')}
@@ -200,16 +193,16 @@ export function SettingsPage() {
                       ...localPrefs,
                       categories: e.target.value.split('\n').filter(c => c.trim() !== '')
                     })}
-                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm"
+                    className="block w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-brand-500 focus:border-brand-500 transition-all shadow-inner"
                   />
-                  <p className="text-xs text-gray-500 italic">Adding/Removing categories will update the options in forms.</p>
+                  <p className="mt-2 text-xs text-gray-400">Updates fees section on save.</p>
                 </div>
               </div>
 
               <div className="space-y-4">
-                <h3 className="text-xl font-semibold text-gray-900 border-b pb-2">Brokerage Fees</h3>
+                <h3 className="text-xl font-bold text-gray-800 mb-4 border-b border-gray-100 pb-2">Global Fees</h3>
                 <div className="max-w-xs space-y-2">
-                  <Label className="text-gray-700">Default Broker Fee (%)</Label>
+                  <Label className="block text-sm font-medium text-gray-600 mb-2">Sell Brokerage (% on Profit)</Label>
                   <Input 
                     type="number" step="any"
                     value={localPrefs.feeSettings.brokerFeePercent}
@@ -217,9 +210,8 @@ export function SettingsPage() {
                       ...localPrefs,
                       feeSettings: { ...localPrefs.feeSettings, brokerFeePercent: parseFloat(e.target.value) }
                     })}
-                    className="border-gray-300 focus:ring-blue-500"
+                    className="block w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-brand-500 focus:border-brand-500 transition-all"
                   />
-                  <p className="text-xs text-gray-500 italic">% taken from gross profit on sales.</p>
                 </div>
               </div>
             </div>
@@ -230,9 +222,9 @@ export function SettingsPage() {
           <button 
             onClick={handleSave} 
             disabled={loading}
-            className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white py-2.5 px-6 rounded-md shadow-md text-sm font-semibold transition-all hover:shadow-lg disabled:opacity-50"
+            className="bg-brand-600 hover:bg-brand-700 text-white font-bold py-3 px-8 rounded-xl shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-0.5 disabled:opacity-50"
           >
-            {loading ? "Saving Changes..." : "Save Settings"}
+            {loading ? "Saving..." : "Save Configuration"}
           </button>
         </div>
       </div>

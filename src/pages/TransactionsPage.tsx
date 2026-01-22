@@ -29,34 +29,32 @@ export function TransactionsPage() {
 
   return (
     <div className="p-4 md:p-8 space-y-6 max-w-7xl mx-auto pb-24">
-      <div className="flex justify-between items-center mb-6">
-        <div>
-          <h2 className="text-3xl font-bold text-gray-800">All Transactions</h2>
-          <p className="text-muted-foreground">Historical record of all Buy and Sell actions</p>
-        </div>
+      <div className="flex justify-between items-center mb-6 bg-white p-4 rounded-xl shadow-sm border border-brand-100">
+        <h2 className="text-2xl font-bold text-brand-900">All Transactions</h2>
         <button 
-          className="bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 text-white font-medium py-2 px-4 rounded-lg shadow-md hover:shadow-lg transition-all"
+          className="bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 font-medium py-2 px-4 rounded-lg shadow-sm transition-all text-sm flex items-center"
           onClick={() => navigate('/')}
         >
-          &larr; Back to Dashboard
+          &larr; Back
         </button>
       </div>
 
-      <div className="mb-4 p-4 blurred-card rounded-xl shadow-lg">
+      <div className="mb-6 p-6 bg-white rounded-2xl shadow-md border border-gray-100">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+          <div>
+            <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Search</label>
             <input 
               type="text"
-              placeholder="Search by asset name or transaction type..." 
-              className="pl-10 w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm"
+              placeholder="Name, date, note..." 
+              className="block w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-brand-500 focus:border-brand-500 text-sm"
               value={search}
               onChange={e => setSearch(e.target.value)}
             />
           </div>
           <div>
+            <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Type</label>
             <select 
-              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm"
+              className="block w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-brand-500 focus:border-brand-500 text-sm"
               value={typeFilter}
               onChange={e => setTypeFilter(e.target.value)}
             >
@@ -66,8 +64,9 @@ export function TransactionsPage() {
             </select>
           </div>
           <div>
+            <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Sort By</label>
             <select 
-              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm"
+              className="block w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-brand-500 focus:border-brand-500 text-sm"
               value={sortBy}
               onChange={e => setSortBy(e.target.value)}
             >
@@ -80,57 +79,51 @@ export function TransactionsPage() {
         </div>
       </div>
 
-      <div className="blurred-card rounded-xl shadow-lg overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200/50">
-            <thead className="bg-gray-50/50">
+      <div className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-200">
+        <div className="overflow-x-auto table-container">
+          <table className="min-w-full divide-y divide-gray-100">
+            <thead className="bg-gray-50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Asset</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Type</th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Quantity</th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Price</th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Net P/L</th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
+                <th className="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase">Date</th>
+                <th className="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase">Asset</th>
+                <th className="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase">Type</th>
+                <th className="px-4 py-3 text-right text-xs font-bold text-gray-500 uppercase">Value</th>
+                <th className="px-4 py-3 text-right text-xs font-bold text-gray-500 uppercase">Net P/L</th>
+                <th className="px-4 py-3 text-right text-xs font-bold text-gray-500 uppercase">Action</th>
               </tr>
             </thead>
-            <tbody className="bg-white/50 divide-y divide-gray-200/50">
+            <tbody className="bg-white divide-y divide-gray-50">
               {displayTransactions.map(tx => (
-                <tr key={tx.id} className="hover:bg-gray-50/50 transition-colors">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{format(new Date(tx.tx_date), 'MMM dd, yyyy')}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{tx.assetName}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                      tx.type === 'Buy' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                    }`}>
-                      {tx.type}
-                    </span>
+                <tr key={tx.id} className="hover:bg-gray-50 transition-colors">
+                  <td className="px-4 py-3 text-sm text-gray-700">{format(new Date(tx.tx_date), 'MMM dd, yyyy')}</td>
+                  <td className="px-4 py-3 text-sm font-bold text-brand-900">{tx.assetName}</td>
+                  <td className={`px-4 py-3 text-sm font-bold ${tx.type === 'Buy' ? 'text-emerald-600' : 'text-red-500'}`}>
+                    {tx.type}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-right text-gray-700">{tx.data.quantity.toFixed(4)}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-right text-gray-700">
-                    {tx.data.currency !== 'INR' && (
-                      <div className="text-[10px] text-gray-400">
-                        {tx.data.currency} {tx.data.originalPrice?.toLocaleString()}
-                      </div>
-                    )}
-                    ₹{tx.data.price.toLocaleString('en-IN')}
+                  <td className="px-4 py-3 text-sm text-gray-700 text-right font-mono">
+                    ₹{(tx.data.quantity * tx.data.price).toLocaleString('en-IN')}
                   </td>
-                  <td className={`px-6 py-4 whitespace-nowrap text-sm text-right font-medium ${tx.data.netProfit && tx.data.netProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  <td className={`px-4 py-3 text-sm text-right font-bold ${tx.data.netProfit && tx.data.netProfit >= 0 ? 'text-emerald-600' : (tx.data.netProfit ? 'text-red-500' : 'text-gray-400')}`}>
                     {tx.data.netProfit ? `₹${tx.data.netProfit.toLocaleString('en-IN')}` : '—'}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-right">
+                  <td className="px-4 py-3 text-sm text-right space-x-2">
                     <button 
-                      className="text-gray-400 hover:text-blue-600 transition-colors"
+                      className="text-brand-600 hover:text-brand-800 font-semibold"
                       onClick={() => navigate(`/add?tab=transaction&editId=${tx.id}`)}
                     >
-                      <Edit2 className="w-4 h-4 inline" />
+                      Edit
+                    </button>
+                    <button 
+                      className="text-red-400 hover:text-red-600 font-semibold"
+                    >
+                      Del
                     </button>
                   </td>
                 </tr>
               ))}
               {displayTransactions.length === 0 && (
                 <tr>
-                  <td colSpan={7} className="px-6 py-8 text-center text-gray-500">No transactions found matching your search.</td>
+                  <td colSpan={6} className="p-8 text-center text-gray-400 italic">No transactions found matching your search.</td>
                 </tr>
               )}
             </tbody>
